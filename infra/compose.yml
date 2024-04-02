@@ -1,0 +1,23 @@
+version: "3.1"
+
+services:
+  db:
+    image: mysql:8.0-debian
+    container_name: darjeeling_db_ctr
+    hostname: darjeeling_db
+    environment:
+      - TZ=Asia/Tokyo
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=darjeeling
+      - MYSQL_USER=darjeeling_user
+      - MYSQL_PASSWORD=darjeeling_pw
+    ports: 
+      - "3306:3306"
+    volumes:
+      - type: volume
+        source: darjeeling_db_vol
+        target: /var/lib/mysql
+
+volumes:
+  darjeeling_db_vol:
+    name: darjeeling_db_vol

@@ -1,6 +1,6 @@
 import { Mutation, Query, Resolver, Args } from '@nestjs/graphql';
 import { UsersService } from './users.service';
-import { Prisma, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UserModel } from './user.model';
 import { FindManyUserArgs } from 'src/generated/user/find-many-user.args';
 import { FindUniqueUserArgs } from 'src/generated/user/find-unique-user.args';
@@ -11,6 +11,13 @@ import { DeleteOneUserArgs } from 'src/generated/user/delete-one-user.args';
 @Resolver((of: any) => UserModel)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
+
+  @Query((returns) => UserModel)
+  async login(
+    @Args('id', { type: () => String }) auth0Id: string,
+  ): Promise<User | null> {
+    return this.usersService.me(auth0Id);
+  }
 
   @Query((returns) => UserModel)
   async user(@Args() { where }: FindUniqueUserArgs): Promise<User | null> {

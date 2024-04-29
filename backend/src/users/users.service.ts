@@ -6,6 +6,14 @@ import { User, Prisma } from '@prisma/client';
 export class UsersService {
   constructor(private prismaService: PrismaService) {}
 
+  async me(auth0Id: string): Promise<User | null> {
+    return this.prismaService.user.findFirst({
+      where: {
+        auth0Id,
+      },
+    });
+  }
+
   async user(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | null> {

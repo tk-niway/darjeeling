@@ -5,10 +5,13 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "node node_modules/prisma-nestjs-graphql"
-  // for yarn monorepos
-  // provider = "prisma-nestjs-graphql"
+  provider = "prisma-client-js"
+}
+generator nestgraphql {
+  provider = "prisma-nestjs-graphql"
   output = "../src/generated"
+  // provider = "node node_modules/prisma-nestjs-graphql"
+  // for yarn monorepos
   // provider = "prisma-client-js"
 }
 
@@ -20,8 +23,9 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   auth0Id   String   @unique
-  email     String?  @unique
-  name      String?  @db.Text
+  email     String   @unique
+  name      String   @db.Text
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(dbgenerated("NOW(3)"))
   updatedAt DateTime @default(dbgenerated("NOW(3) ON UPDATE NOW(3)"))
 }

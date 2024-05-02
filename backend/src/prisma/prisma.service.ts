@@ -7,7 +7,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     super({
       datasources: {
         db: {
-          url: 'mysql://root:password@localhost:3306/darjeeling',
+          url: `${process.env.DB_PROVIDER}://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`,
         },
       },
     });

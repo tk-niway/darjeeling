@@ -1,15 +1,20 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { GraphQLModule } from '@nestjs/graphql';
-import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
 import { join } from 'path';
-import { PrismaModule } from './prisma/prisma.module';
-import { PrismaService } from './prisma/prisma.service';
-import { UsersModule } from './users/users.module';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
+import { APP_GUARD } from '@nestjs/core';
+import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AppController } from 'src/app.controller';
+import { AppService } from 'src/app.service';
+import { UsersModule } from 'src/users/users.module';
+import { AuthzModule } from 'src/authz/authz.module';
+import { AuthzGuard } from 'src/authz/authz.guard';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
       graphiql: process.env.NODE_ENV !== 'production',
@@ -18,8 +23,16 @@ import { UsersModule } from './users/users.module';
     }),
     PrismaModule,
     UsersModule,
+    AuthzModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthzGuard,
+    },
+    AppService,
+    PrismaService
+  ],
 })
 export class AppModule {}

@@ -1,13 +1,9 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { GqlExecutionContext } from '@nestjs/graphql';
+import { convertReq } from 'src/helper';
 
 export const Token = createParamDecorator(
   (_data: unknown, context: ExecutionContext) => {
-    const gqlContext = GqlExecutionContext.create(context);
-
-    const ctx = gqlContext.getContext();
-
-    const request = ctx.req || context.switchToHttp().getRequest<Request>();
+    const request = convertReq(context);
 
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
 

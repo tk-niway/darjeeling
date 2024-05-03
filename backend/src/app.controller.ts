@@ -1,12 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { AppService } from 'src/app.service';
+import { Public } from 'src/authz/decorators/public.decorator';
 
-@Controller()
+@Controller('health')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @Public()
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  healthCheck(): string {
+    return 'OK';
   }
 }

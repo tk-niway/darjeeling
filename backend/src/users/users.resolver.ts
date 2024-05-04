@@ -7,6 +7,11 @@ import { UpdateOneUserArgs } from 'src/generated/user/update-one-user.args';
 import { DeleteOneUserArgs } from 'src/generated/user/delete-one-user.args';
 import { User } from 'src/generated/user/user.model';
 import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Resolver((of: any) => User)
 export class UsersResolver {
@@ -14,7 +19,23 @@ export class UsersResolver {
 
   @Query((returns) => User)
   async user(@Args() { where }: FindUniqueUserArgs): Promise<User> {
-    return this.usersService.user(where);
+    try {
+      const user = await this.usersService.user(where);
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException(
+          'An error occurred while processing your request',
+        );
+      }
+    }
   }
 
   @Query((returns) => [User])
@@ -34,7 +55,7 @@ export class UsersResolver {
     @Args() { data, where }: UpdateOneUserArgs,
   ): Promise<User> {
     if (currentUser.id !== where.id)
-      throw new Error('You can only update your own user');
+      throw new ForbiddenException('You can only update your own user');
 
     return this.usersService.updateUser({ where, data });
   }
@@ -44,7 +65,7 @@ export class UsersResolver {
     @Args() { where }: DeleteOneUserArgs,
   ): Promise<User> {
     if (currentUser.id !== where.id)
-      throw new Error('You can only update your own user');
+      throw new ForbiddenException('You can only update your own user');
 
     return this.usersService.deleteUser(where);
   }

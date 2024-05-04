@@ -7,9 +7,15 @@ import { User } from 'src/generated/user/user.model';
 export class UsersService {
   constructor(private prismaService: PrismaService) {}
 
-  async user(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User> {
+  async totalCount(params: Prisma.UserAggregateArgs): Promise<number> {
+    const users = await this.prismaService.user.aggregate({
+      where: { isActive: true, ...params.where },
+      _count: true,
+    });
+    return users._count;
+  }
+
+  async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput): Promise<User> {
     return this.prismaService.user.findUniqueOrThrow({
       where: { isActive: true, ...userWhereUniqueInput },
     });
@@ -32,7 +38,7 @@ export class UsersService {
     return this.prismaService.user.upsert({
       create: data,
       update: {},
-      where: { auth0Id: data.auth0Id, isActive: true},
+      where: { auth0Id: data.auth0Id, isActive: true },
     });
   }
 

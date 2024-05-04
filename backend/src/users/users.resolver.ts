@@ -12,6 +12,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { PaginatedUser } from 'src/users/models/paginatedUser.model';
+import { generateEdges, generatePageInfo } from 'src/helper';
 
 @Resolver((of: any) => User)
 export class UsersResolver {
@@ -38,11 +40,25 @@ export class UsersResolver {
     }
   }
 
-  @Query((returns) => [User])
+  @Query((returns) => PaginatedUser)
   async users(
     @Args() { skip, take, cursor, where, orderBy }: FindManyUserArgs,
-  ): Promise<User[]> {
-    return this.usersService.users({ skip, take, cursor, where, orderBy });
+  ): Promise<PaginatedUser> {
+    const users = await this.usersService.users({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
+
+    const totalCount = await this.usersService.totalCount({ where });
+
+    const edges = generateEdges(users);
+
+    const pageInfo = generatePageInfo({ skip, take, totalCount, edges });
+
+    return { edges, pageInfo, totalCount, nodes: users };
   }
 
   @Mutation((returns) => User)

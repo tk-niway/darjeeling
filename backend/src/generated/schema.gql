@@ -67,11 +67,25 @@ input NestedStringFilter {
   startsWith: String
 }
 
+type PageInfo {
+  endCursor: String!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+}
+
+type PaginatedUser {
+  edges: [UserEdge!]
+  nodes: [User!]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
 type Query {
   signin: User!
   signup: User!
   user(where: UserWhereUniqueInput!): User!
-  users(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
+  users(cursor: UserWhereUniqueInput, distinct: [UserScalarFieldEnum!], orderBy: [UserOrderByWithRelationInput!], skip: Int, take: Int, where: UserWhereInput): PaginatedUser!
 }
 
 enum SortOrder {
@@ -115,6 +129,11 @@ input UserCreateInput {
   isActive: Boolean
   name: String!
   updatedAt: DateTime
+}
+
+type UserEdge {
+  cursor: String!
+  node: User!
 }
 
 input UserOrderByWithRelationInput {

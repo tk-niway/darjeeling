@@ -20,6 +20,7 @@ describe('UsersResolver', () => {
         {
           provide: UsersService,
           useValue: {
+            totalCount: jest.fn(),
             user: jest.fn(),
             users: jest.fn(),
             createUser: jest.fn(),
@@ -104,10 +105,95 @@ describe('UsersResolver', () => {
         },
       ];
       jest.spyOn(usersService, 'users').mockResolvedValue(users);
+      jest.spyOn(usersService, 'totalCount').mockResolvedValue(users.length);
+
+      const expected = {
+        edges: users.map((user) => ({ cursor: user.id, node: user })),
+        nodes: users,
+        pageInfo: {
+          endCursor: users[users.length - 1].id,
+          hasNextPage: false,
+          hasPreviousPage: false,
+          startCursor: users[0].id,
+        },
+        totalCount: users.length,
+      };
 
       expect(
         await usersResolver.users({ skip, take, cursor, where, orderBy }),
-      ).toEqual(users);
+      ).toEqual(expected);
+    });
+
+    it('should return users with hasNextPage and hasPreviousPage as true', async () => {
+      const skip = 1;
+      const take = 2; // ページネーションのサイズを2に設定
+      const cursor = null;
+      const where = {};
+      const orderBy = null;
+      const users: User[] = [
+        // 3つのユーザーを作成してページネーションの範囲を超えるようにする
+        {
+          id: '1',
+          name: 'User 1',
+          auth0Id: '',
+          email: '',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '2',
+          name: 'User 2',
+          auth0Id: '',
+          email: '',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '3',
+          name: 'User 3',
+          auth0Id: '',
+          email: '',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '4',
+          name: 'User 4',
+          auth0Id: '',
+          email: '',
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+
+      const slicedUsers = users.slice(skip, skip + take);
+
+      jest.spyOn(usersService, 'users').mockResolvedValue(slicedUsers);
+      jest.spyOn(usersService, 'totalCount').mockResolvedValue(users.length);
+
+      const result = await usersResolver.users({
+        skip,
+        take,
+        cursor,
+        where,
+        orderBy,
+      });
+
+      expect(result).toEqual({
+        edges: slicedUsers.map((user) => ({ cursor: user.id, node: user })),
+        nodes: slicedUsers,
+        pageInfo: {
+          startCursor: users[skip].id,
+          endCursor: users[skip + take - 1].id,
+          hasNextPage: true,
+          hasPreviousPage: true,
+        },
+        totalCount: users.length,
+      });
     });
 
     it('should throw InternalServerErrorException if an error occurs', async () => {

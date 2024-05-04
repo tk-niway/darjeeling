@@ -2,7 +2,7 @@ import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,7 +11,6 @@ import { AppService } from 'src/app.service';
 import { UsersModule } from 'src/users/users.module';
 import { AuthzModule } from 'src/authz/authz.module';
 import { AuthzGuard } from 'src/authz/authz.guard';
-import { HttpExceptionFilter } from 'src/exceptions/http-exception.filter';
 
 @Module({
   imports: [
@@ -31,10 +30,6 @@ import { HttpExceptionFilter } from 'src/exceptions/http-exception.filter';
     {
       provide: APP_GUARD,
       useClass: AuthzGuard,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
     },
     AppService,
     PrismaService,

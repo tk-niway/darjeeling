@@ -18,5 +18,9 @@ describe('AppController', () => {
     it('should return "OK"', () => {
       expect(appController.healthCheck()).toBe('OK');
     });
+
+    it('Not return "NG"', () => {
+      expect(appController.healthCheck()).not.toBe('NG');
+    });
   });
 });

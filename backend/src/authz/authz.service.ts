@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwkToPem from 'jwk-to-pem';
 import * as jwt from 'jsonwebtoken';
@@ -57,7 +57,7 @@ export class AuthzService {
       | undefined;
 
     if (!decodedToken || !decodedToken.sub) {
-      throw new Error(`Invalid token ${{ decodedToken }}`);
+      throw new UnauthorizedException(`Invalid token ${{ decodedToken }}`);
     }
 
     return this.usersService.user({
@@ -118,7 +118,7 @@ export class AuthzService {
       return authzUser;
     } catch (error) {
       console.error(error);
-      throw error;
+      throw new UnauthorizedException(error);
     }
   }
 

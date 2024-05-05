@@ -29,5 +29,13 @@ describe('AuthzGuard', () => {
     expect(guard.canActivate(context)).toBe(true);
   });
 
-  // Add more test cases as needed
+  it('should call super.canActivate if route is not public', () => {
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+    const context = {
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
+    } as unknown as ExecutionContext;
+    jest.spyOn(guard, 'canActivate').mockReturnValue(true);
+    expect(guard.canActivate(context)).toBe(true);
+  });
 });

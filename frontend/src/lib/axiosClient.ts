@@ -4,7 +4,7 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-export const BackendApiClient = axios.create({
+export const backendApiClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT}/api`,
   headers,
 });

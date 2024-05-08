@@ -1,9 +1,10 @@
 "use client";
+// import "./globals.css";
 import { Inter } from "next/font/google";
 import { Auth0Provider } from "@auth0/auth0-react";
 import React from "react";
+import { ChakraProviders } from "@/app/_providers/chakraProviders";
 
-// import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,7 @@ export default function RootLayout({
             redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL!}/login`,
           }}
         >
-          {children}
+          <ChakraProviders>{children}</ChakraProviders>
         </Auth0Provider>
       </body>
     </html>

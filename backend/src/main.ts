@@ -13,6 +13,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
+    { cors: true },
   );
 
   app.useGlobalFilters(new AllExceptionsFilter());

@@ -7,20 +7,14 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { Button } from "@mui/material";
+import { useAuthUser } from "@/app/_providers/authUserProvider";
 
-export default function MenuAppBar() {
-  const [auth, setAuth] = React.useState(true);
+export default function AppHeader() {
+  const { isAuthenticated, loginWithRedirect, signout } = useAuthUser();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAuth(event.target.checked);
-  };
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,18 +26,6 @@ export default function MenuAppBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={auth}
-              onChange={handleChange}
-              aria-label="login switch"
-            />
-          }
-          label={auth ? "Logout" : "Login"}
-        />
-      </FormGroup>
       <AppBar position="static">
         <Toolbar>
           <IconButton
@@ -58,7 +40,7 @@ export default function MenuAppBar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Photos
           </Typography>
-          {auth ? (
+          {isAuthenticated ? (
             <div>
               <IconButton
                 size="large"
@@ -87,12 +69,17 @@ export default function MenuAppBar() {
               >
                 <MenuItem onClick={handleClose}>Profile</MenuItem>
                 <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={() => signout()}>サインアウト</MenuItem>
               </Menu>
             </div>
           ) : (
             <>
-              <Button color="inherit">Sign in</Button>
-              <Button color="inherit">Sign up</Button>
+              <Button color="inherit" onClick={() => loginWithRedirect()}>
+                Sign in
+              </Button>
+              <Button color="inherit" onClick={() => loginWithRedirect()}>
+                Sign up
+              </Button>
             </>
           )}
         </Toolbar>

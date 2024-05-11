@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AppHeader from "../_components/appHeader";
+import AppHeader from "@/app/_components/appHeader";
 
 export const metadata: Metadata = {
   title: "Darjeeling",

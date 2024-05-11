@@ -7,6 +7,9 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/lib/theme";
 import { frontendUrl } from "@/utils/consts";
+import { AuthApolloProvider } from "@/app/_providers/authApolloProvider";
+import { AuthUserProvider } from "@/app/_providers/authUserProvider";
+import { ENV } from "@/utils/consts";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,15 +22,19 @@ export default function RootLayout({
     <html lang="ja">
       <body className={inter.className}>
         <Auth0Provider
-          domain={process.env.NEXT_PUBLIC_AUTH0_DOMAIN!}
-          clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID!}
+          domain={ENV.AUTH0_DOMAIN}
+          clientId={ENV.AUTH0_CLIENT_ID}
           authorizationParams={{
             redirect_uri: frontendUrl,
           }}
         >
-          <AppRouterCacheProvider>
-            <ThemeProvider theme={theme}>{children}</ThemeProvider>
-          </AppRouterCacheProvider>
+          <AuthApolloProvider>
+            <AuthUserProvider>
+              <AppRouterCacheProvider>
+                <ThemeProvider theme={theme}>{children}</ThemeProvider>
+              </AppRouterCacheProvider>
+            </AuthUserProvider>
+          </AuthApolloProvider>
         </Auth0Provider>
       </body>
     </html>

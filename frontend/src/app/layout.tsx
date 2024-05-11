@@ -1,10 +1,12 @@
 "use client";
 // import "./globals.css";
+import React from "react";
 import { Inter } from "next/font/google";
 import { Auth0Provider } from "@auth0/auth0-react";
-import React from "react";
-import { ChakraProviders } from "@/app/_providers/chakraProviders";
-
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "@/lib/theme";
+import { frontendUrl } from "@/utils/consts";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,10 +22,12 @@ export default function RootLayout({
           domain={process.env.NEXT_PUBLIC_AUTH0_DOMAIN!}
           clientId={process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID!}
           authorizationParams={{
-            redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL!}/login`,
+            redirect_uri: frontendUrl,
           }}
         >
-          <ChakraProviders>{children}</ChakraProviders>
+          <AppRouterCacheProvider>
+            <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          </AppRouterCacheProvider>
         </Auth0Provider>
       </body>
     </html>

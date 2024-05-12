@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { convertReq } from 'src/helper';
+import { convertReq } from 'src/utils';
 
 export const Token = createParamDecorator(
   (_data: unknown, context: ExecutionContext) => {

@@ -4,7 +4,6 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from 'src/app.module';
-import { AllExceptionsFilter } from 'src/exceptions/all-exception.filter';
 
 const port = process.env.PORT || 3000;
 
@@ -16,7 +15,8 @@ async function bootstrap() {
     { cors: true },
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  // NOTE - Uncomment this line to enable the global filter
+  // app.useGlobalFilters(new AllExceptionsFilter());
 
   await app.listen(port, '0.0.0.0');
 

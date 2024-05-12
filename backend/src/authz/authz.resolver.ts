@@ -12,12 +12,12 @@ export class AuthzResolver {
   @Public()
   @Query((returns) => User)
   async signup(@Token() token: string): Promise<User> {
-    return this.authzService.signup(token);
+    return await this.authzService.signup(token);
   }
 
   @Public()
   @Query((returns) => User)
   async signin(@Token() token: string): Promise<User> {
-    return this.authzService.signin(token);
+    return await this.authzService.signin(token);
   }
 }

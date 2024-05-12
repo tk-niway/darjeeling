@@ -9,15 +9,15 @@ export class UsersService {
 
   async totalCount(params: Prisma.UserAggregateArgs): Promise<number> {
     const users = await this.prismaService.user.aggregate({
-      where: { isActive: true, ...params.where },
+      where: { ...params.where },
       _count: true,
     });
     return users._count;
   }
 
   async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prismaService.user.findUniqueOrThrow({
-      where: { isActive: true, ...userWhereUniqueInput },
+    return await this.prismaService.user.findUnique({
+      where: { ...userWhereUniqueInput },
     });
   }
 
@@ -28,14 +28,14 @@ export class UsersService {
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput[];
   }): Promise<User[]> {
-    return this.prismaService.user.findMany({
+    return await this.prismaService.user.findMany({
       ...params,
-      where: { isActive: true, ...params.where },
+      where: { ...params.where },
     });
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prismaService.user.upsert({
+    return await this.prismaService.user.upsert({
       create: data,
       update: {},
       where: { auth0Id: data.auth0Id, isActive: true },
@@ -46,7 +46,7 @@ export class UsersService {
     where: Prisma.UserWhereUniqueInput;
     data: Prisma.UserUpdateInput;
   }): Promise<User> {
-    return this.prismaService.user.update(params);
+    return await this.prismaService.user.update(params);
   }
 
   async deleteUser(

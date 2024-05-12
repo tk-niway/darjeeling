@@ -9,11 +9,10 @@ import { User } from 'src/generated/user/user.model';
 import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
 import {
   ForbiddenException,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { PaginatedUser } from 'src/users/models/paginatedUser.model';
-import { generateEdges, generatePageInfo } from 'src/helper';
+import { generateEdges, generatePageInfo } from 'src/utils';
 
 @Resolver((of: any) => User)
 export class UsersResolver {
@@ -21,23 +20,13 @@ export class UsersResolver {
 
   @Query((returns) => User)
   async user(@Args() { where }: FindUniqueUserArgs): Promise<User> {
-    try {
-      const user = await this.usersService.user(where);
+    const user = await this.usersService.user(where);
 
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      return user;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new InternalServerErrorException(
-          'An error occurred while processing your request',
-        );
-      }
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
+
+    return user;
   }
 
   @Query((returns) => PaginatedUser)
@@ -48,7 +37,7 @@ export class UsersResolver {
       skip,
       take,
       cursor,
-      where,
+      where: { ...where, isActive: true },
       orderBy,
     });
 

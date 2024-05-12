@@ -1,10 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwkToPem from 'jwk-to-pem';
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/generated/user/user.model';
+import { GraphQLError } from 'graphql';
 
 type JWKFile = {
   keys: jwkToPem.JWK[];
@@ -44,7 +50,15 @@ export class AuthzService {
   async signup(token: string): Promise<User> {
     const authzUser = await this.fetchUser(token);
 
-    return this.usersService.createUser({
+    const user = await this.usersService.user({
+      auth0Id: authzUser.sub,
+    });
+
+    // the user is forbidden to signin
+    if (user && !user.isActive)
+      throw new ForbiddenException('User is not active');
+
+    return await this.usersService.createUser({
       auth0Id: authzUser.sub,
       email: authzUser.email,
       name: authzUser.name,
@@ -60,10 +74,22 @@ export class AuthzService {
       throw new UnauthorizedException(`Invalid token ${{ decodedToken }}`);
     }
 
-    return this.usersService.user({
+    const user = await this.usersService.user({
       auth0Id: decodedToken.sub,
-      isActive: true,
     });
+
+    // if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new GraphQLError('User not found',{
+      extensions: {
+        code: 'USER_NOT_FOUND',
+        user: null,
+      }
+    })
+
+    // the user is forbidden to signin
+    if (!user.isActive) throw new ForbiddenException('User is not active');
+
+    return user;
   }
 
   private verifyJwt = (token: string): Promise<string | JwtPayload> => {

@@ -1,5 +1,5 @@
 import { ObjectType } from '@nestjs/graphql';
-import { PaginatedConnection } from 'src/pagination/models/paginatedConnection.model';
+import { PaginatedConnection } from 'src/lib/models/paginatedConnection.model';
 import { User } from 'src/generated/user/user.model';
 
 @ObjectType()

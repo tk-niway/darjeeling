@@ -2,7 +2,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { UserModel } from 'src/users/user.model';
+import { User } from 'src/generated/user/user.model';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
@@ -19,7 +19,7 @@ describe('JwtStrategy', () => {
             // to validate the payload and return a user
             user: jest
               .fn()
-              .mockResolvedValue({ id: 'testUserId' } as UserModel),
+              .mockResolvedValue({ id: 'testUserId' } as User),
           },
         },
       ],

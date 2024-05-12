@@ -1,8 +1,8 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Type } from '@nestjs/common';
-import { PageInfo } from './pageInfo.model';
+import { PageInfo } from 'src/lib/models/pageInfo.model';
 
-export function PaginatedConnection<T>(classRef: Type<T>): any {
+export function PaginatedConnection<T>(classRef: Type<T>) {
   @ObjectType({ isAbstract: true })
   class AbstractConnectionType {
     @Field((type) => Int)

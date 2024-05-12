@@ -1,16 +1,10 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwkToPem from 'jwk-to-pem';
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/generated/user/user.model';
-import { GraphQLError } from 'graphql';
+import { UserWithError } from 'src/users/models/userWithError.model';
 
 type JWKFile = {
   keys: jwkToPem.JWK[];
@@ -47,7 +41,7 @@ export class AuthzService {
     this.issuer = this.configService.get('AUTH0_ISSUER');
   }
 
-  async signup(token: string): Promise<User> {
+  async signup(token: string): Promise<UserWithError> {
     const authzUser = await this.fetchUser(token);
 
     const user = await this.usersService.user({
@@ -55,17 +49,23 @@ export class AuthzService {
     });
 
     // the user is forbidden to signin
-    if (user && !user.isActive)
-      throw new ForbiddenException('User is not active');
+    if (user && !user.isActive) {
+      return {
+        user: null,
+        userErrors: [{ message: 'User is not active', field: null }],
+      };
+    }
 
-    return await this.usersService.createUser({
+    const createdUser = await this.usersService.createUser({
       auth0Id: authzUser.sub,
       email: authzUser.email,
       name: authzUser.name,
     });
+
+    return { user: createdUser, userErrors: [] };
   }
 
-  async signin(token: string): Promise<User> {
+  async signin(token: string): Promise<UserWithError> {
     const decodedToken = (await this.verifyJwt(token)) as
       | DecodedToken
       | undefined;
@@ -78,18 +78,23 @@ export class AuthzService {
       auth0Id: decodedToken.sub,
     });
 
-    // if (!user) throw new NotFoundException('User not found');
-    if (!user) throw new GraphQLError('User not found',{
-      extensions: {
-        code: 'USER_NOT_FOUND',
+    // the user is not found
+    if (!user) {
+      return {
         user: null,
-      }
-    })
+        userErrors: [{ message: 'User not found', field: null }],
+      };
+    }
 
     // the user is forbidden to signin
-    if (!user.isActive) throw new ForbiddenException('User is not active');
+    if (!user.isActive) {
+      return {
+        user: null,
+        userErrors: [{ message: 'User is not active', field: null }],
+      };
+    }
 
-    return user;
+    return { user, userErrors: [] };
   }
 
   private verifyJwt = (token: string): Promise<string | JwtPayload> => {

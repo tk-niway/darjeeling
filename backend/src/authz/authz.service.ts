@@ -98,36 +98,36 @@ export class AuthzService {
   }
 
   private verifyJwt = (token: string): Promise<string | JwtPayload> => {
-    return new Promise(async (resolve, reject) => {
-      // make a request to get the JWKs
-      const jwks = (await (
-        await fetch(`https://${this.issuer}/.well-known/jwks.json`)
-      ).json()) as JWKFile | undefined;
+    return new Promise(
+      async (resolve, reject): Promise<string | JwtPayload> => {
+        // make a request to get the JWKs
+        const jwks = (await (
+          await fetch(`https://${this.issuer}/.well-known/jwks.json`)
+        ).json()) as JWKFile | undefined;
 
-      if (!jwks || jwks.keys?.[0] == undefined) {
-        return undefined;
-      }
+        if (!jwks || jwks.keys?.[0] == undefined) {
+          return undefined;
+        }
 
-      // convert the jwks to a pem string
-      const pem = jwkToPem(jwks.keys[0]);
+        // convert the jwks to a pem string
+        const pem = jwkToPem(jwks.keys[0]);
 
-      jwt.verify(
-        token,
-        pem,
-        {
-          algorithms: ['RS256'],
-          // audience: 'https://${this.audienc}',
-          // issuer: issuer,
-        },
-        (err, decoded) => {
-          if (err) {
-            console.error('invalid token', err);
-            return reject(undefined);
-          }
-          return resolve(decoded);
-        },
-      );
-    });
+        jwt.verify(
+          token,
+          pem,
+          {
+            algorithms: ['RS256'],
+            // audience: 'https://${this.audienc}',
+            // issuer: issuer,
+          },
+          (err, decoded) => {
+            if (err) return reject(new UnauthorizedException(err.name));
+
+            return resolve(decoded);
+          },
+        );
+      },
+    );
   };
 
   private async fetchUser(token: string): Promise<AuthzUser> {
@@ -136,19 +136,16 @@ export class AuthzService {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!response.ok) {
-        throw new Error('Unable to fetch user info');
-      }
+      if (!response.ok)
+        throw new UnauthorizedException('Unable to fetch user info');
 
       const authzUser = await response.json();
 
-      if (!this.isAuthzUser(authzUser)) {
-        throw new Error(`Invalid user info ${{ authzUser }}`);
-      }
+      if (!this.isAuthzUser(authzUser))
+        throw new UnauthorizedException(`Invalid user info ${{ authzUser }}`);
 
       return authzUser;
     } catch (error) {
-      console.error(error);
       throw new UnauthorizedException(error);
     }
   }

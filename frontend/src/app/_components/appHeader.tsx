@@ -13,7 +13,7 @@ import { Button } from "@mui/material";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 
 export default function AppHeader() {
-  const { isAuthenticated, loginWithRedirect, signout } = useAuthUser();
+  const { loginWithRedirect, signout, authUser } = useAuthUser();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -40,7 +40,7 @@ export default function AppHeader() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Photos
           </Typography>
-          {isAuthenticated ? (
+          {authUser?.id ? (
             <div>
               <IconButton
                 size="large"

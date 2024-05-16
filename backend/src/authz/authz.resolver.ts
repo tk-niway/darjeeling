@@ -1,4 +1,4 @@
-import { Query } from '@nestjs/graphql';
+import { Mutation, Query } from '@nestjs/graphql';
 import { Resolver } from '@nestjs/graphql';
 import { AuthzService } from 'src/authz/authz.service';
 import { Token } from 'src/authz/decorators/token.decorator';
@@ -10,7 +10,7 @@ export class AuthzResolver {
   constructor(private readonly authzService: AuthzService) {}
 
   @Public()
-  @Query((returns) => UserWithError)
+  @Mutation((returns) => UserWithError)
   async signup(@Token() token: string): Promise<UserWithError> {
     return await this.authzService.signup(token);
   }

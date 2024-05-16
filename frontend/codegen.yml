@@ -1,0 +1,8 @@
+overwrite: true
+schema: "../backend/src/generated/schema.gql"
+generates:
+  ./src/types/generated/graphqlTypes.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-resolvers'
+      - 'typescript-react-apollo'

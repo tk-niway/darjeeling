@@ -7,58 +7,20 @@ import {
   useState,
   useEffect,
   createContext,
-  ReactNode,
   useContext,
+  useMemo,
+  useCallback,
 } from "react";
-import { useAuth0, AppState, RedirectLoginOptions } from "@auth0/auth0-react";
-import {
-  GetTokenSilentlyOptions,
-  GetTokenSilentlyVerboseResponse,
-} from "@auth0/auth0-spa-js";
+import { useAuth0 } from "@auth0/auth0-react";
 import { useApolloClient, gql, ApolloClient } from "@apollo/client";
 import { ENV } from "@/utils/consts";
 import { useToken } from "@/app/_providers/authApolloProvider";
-
-/**
- * Represents the shape of an authenticated user.
- */
-type AuthUser = {
-  auth0Id: string;
-  createdAt: string;
-  email: string;
-  id: string;
-  name: string;
-  updatedAt: string;
-};
-
-/**
- * Represents the shape of the authentication user context.
- */
-type AuthUserContextType = {
-  authUser: AuthUser;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  setAuthUser: (authUser: AuthUser) => void;
-  loginWithRedirect: (options?: RedirectLoginOptions<AppState>) => void;
-  signout: () => void;
-  getAccessTokenSilently: {
-    (
-      options: GetTokenSilentlyOptions & { detailedResponse: true }
-    ): Promise<GetTokenSilentlyVerboseResponse>;
-    (options?: GetTokenSilentlyOptions): Promise<string>;
-    (options: GetTokenSilentlyOptions): Promise<
-      GetTokenSilentlyVerboseResponse | string
-    >;
-  };
-  hasToken: boolean;
-};
-
-/**
- * Represents the options for the AuthUserProvider component.
- */
-type AuthUserProviderOptions = {
-  children?: ReactNode;
-};
+import {
+  UserError,
+  AuthUserContextType,
+  AuthUserProviderOptions,
+  User,
+} from "@/types";
 
 /**
  * Context for managing the authenticated user.
@@ -75,7 +37,7 @@ export const AuthUserContext = createContext<AuthUserContextType>(
 export const AuthUserProvider = ({
   children,
 }: AuthUserProviderOptions): JSX.Element => {
-  const [authUser, setAuthUser] = useState<AuthUser>({} as AuthUser);
+  const [authUser, setAuthUser] = useState<User>({} as User);
   const { token, setToken } = useToken();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -115,7 +77,7 @@ export const AuthUserProvider = ({
   }, [token]);
 
   useEffect(() => {
-    const getToken = async () => {
+    const _getToken = async () => {
       try {
         const accessToken = await getAccessTokenSilently({
           authorizationParams: {
@@ -129,32 +91,43 @@ export const AuthUserProvider = ({
       }
     };
 
-    if (hasToken) getToken();
+    if (hasToken) _getToken();
   }, [hasToken]);
 
   /**
    * Signs out the user.
    */
-  const signout = () => {
+  const signout = useCallback(() => {
     setToken(null);
     setIsAuthenticated(false);
-    setAuthUser({} as AuthUser);
+    setAuthUser({} as User);
     logout();
-  };
+  }, [setToken, setIsAuthenticated, setAuthUser, logout]);
+
+  const contextValue = useMemo<AuthUserContextType>(() => {
+    return {
+      authUser,
+      isAuthenticated,
+      isLoading,
+      setAuthUser,
+      loginWithRedirect,
+      signout,
+      getAccessTokenSilently,
+      hasToken,
+    };
+  }, [
+    authUser,
+    isAuthenticated,
+    isLoading,
+    setAuthUser,
+    loginWithRedirect,
+    signout,
+    getAccessTokenSilently,
+    hasToken,
+  ]);
 
   return (
-    <AuthUserContext.Provider
-      value={{
-        authUser,
-        isAuthenticated,
-        isLoading,
-        setAuthUser,
-        loginWithRedirect,
-        signout,
-        getAccessTokenSilently,
-        hasToken,
-      }}
-    >
+    <AuthUserContext.Provider value={contextValue}>
       {children}
     </AuthUserContext.Provider>
   );
@@ -209,11 +182,9 @@ const querySignup = gql`
 /**
  * Signs up a user.
  * @param {ApolloClient<object>} client - The Apollo client.
- * @returns {Promise<AuthUser | undefined>} A promise that resolves to the authenticated user or undefined if the user is not active.
+ * @returns {Promise<User | undefined>} A promise that resolves to the authenticated user or undefined if the user is not active.
  */
-async function signup(
-  client: ApolloClient<object>
-): Promise<AuthUser | undefined> {
+async function signup(client: ApolloClient<object>): Promise<User | undefined> {
   const {
     data: {
       signup: { user, userErrors },
@@ -232,11 +203,11 @@ async function signup(
 /**
  * Signs in a user.
  * @param {ApolloClient<object>} client - The Apollo client.
- * @returns {Promise<AuthUser | null | undefined>} A promise that resolves to the authenticated user, null if the user is not found, or undefined if the user is not active.
+ * @returns {Promise<User | null | undefined>} A promise that resolves to the authenticated user, null if the user is not found, or undefined if the user is not active.
  */
 async function signin(
   client: ApolloClient<object>
-): Promise<AuthUser | null | undefined> {
+): Promise<User | null | undefined> {
   const {
     data: {
       signin: { user, userErrors },
@@ -256,10 +227,10 @@ async function signin(
 
 /**
  * Parses user errors.
- * @param {any} userErrors - The user errors.
+ * @param {UserError[]} userErrors - The user errors.
  * @returns  {userNotFound: boolean; userNotActive: boolean;} An object containing flags for user not found and user not active errors.
  */
-function parseUserErrors(userErrors: any): {
+function parseUserErrors(userErrors: UserError[]): {
   userNotFound: boolean;
   userNotActive: boolean;
 } {

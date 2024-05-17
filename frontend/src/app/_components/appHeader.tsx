@@ -40,7 +40,7 @@ export default function AppHeader() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Photos
           </Typography>
-          {authUser?.id ? (
+          {authUser.isActive ? (
             <div>
               <IconButton
                 size="large"

@@ -1,7 +1,6 @@
 import { AuthzService } from 'src/authz/authz.service';
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from 'src/authz/jwt.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthzResolver } from 'src/authz/authz.resolver';
@@ -15,7 +14,6 @@ import { UsersService } from 'src/users/users.service';
     PrismaService,
     AuthzResolver,
     UsersService,
-    ConfigService,
   ],
   exports: [PassportModule],
 })

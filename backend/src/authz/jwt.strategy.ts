@@ -4,13 +4,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/generated/user/user.model';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private usersService: UsersService) {
-    const issuer = process.env.AUTH0_ISSUER || '';
+  constructor(
+    private usersService: UsersService,
+    private configService: ConfigService,
+  ) {
+    const issuer = configService.get('AUTH0_ISSUER');
 
-    const audience = process.env.AUTH0_AUDIENCE || '';
+    const audience = configService.get('AUTH0_AUDIENCE');
 
     super({
       secretOrKeyProvider: passportJwtSecret({

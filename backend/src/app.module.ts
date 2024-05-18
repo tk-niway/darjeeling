@@ -14,7 +14,9 @@ import { AuthzGuard } from 'src/authz/authz.guard';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
       graphiql: process.env.NODE_ENV !== 'production',

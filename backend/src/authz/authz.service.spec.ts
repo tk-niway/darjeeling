@@ -44,7 +44,7 @@ describe('AuthzService', () => {
         updatedAt: new Date(),
       });
 
-      const user = await authzService.signup(token);
+      const { user } = await authzService.signup(token);
       expect(user).toBeDefined();
       expect(user).toHaveProperty('id');
       expect(user).toHaveProperty('auth0Id');
@@ -55,15 +55,34 @@ describe('AuthzService', () => {
       expect(user).toHaveProperty('updatedAt');
     });
 
-    it('should throw an error when an invalid token is provided', async () => {
-      const token = 'invalid_token';
-      jest
-      .spyOn(authzService as any, 'fetchUser')
-      .mockResolvedValue(
-        undefined,
-      );
+    it('should return an errorUser with a not active user', async () => {
+      const token = 'valid_token';
+      const fetchUserSpy = {
+        sub: 'auth0|1111e1111',
+        name: 'auth_test1',
+        email: 'auth_test1@example.com',
+      };
 
-      await expect(authzService.signup(token)).rejects.toThrowError();
+      jest
+        .spyOn(authzService as any, 'fetchUser')
+        .mockResolvedValue(fetchUserSpy);
+
+      jest.spyOn(usersService, 'user').mockResolvedValue({
+        id: '1',
+        auth0Id: fetchUserSpy.sub,
+        name: fetchUserSpy.name,
+        email: fetchUserSpy.email,
+        isActive: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const { user, userErrors } = await authzService.signup(token);
+
+      expect(user).toBeNull();
+      expect(userErrors).toHaveLength(1);
+      expect(userErrors[0].message).toBe('User is not active');
+      expect(userErrors[0].field).toBeNull();
     });
   });
 
@@ -86,7 +105,7 @@ describe('AuthzService', () => {
 
       jest.spyOn(usersService, 'user').mockResolvedValue(mockUser);
 
-      const user = await authzService.signin(token);
+      const { user } = await authzService.signin(token);
 
       expect(user).toBeDefined();
       expect(user).toHaveProperty('id');
@@ -97,14 +116,31 @@ describe('AuthzService', () => {
       expect(user).toHaveProperty('updatedAt');
     });
 
-    it('should throw an error when an invalid token is provided', async () => {
-      const token = 'invalid_token';
-      
-      jest.spyOn(authzService as any, 'verifyJwt').mockResolvedValue(undefined);
+    it('should return a userError with a not active user', async () => {
+      const token = 'valid_token';
 
-      await expect(authzService.signin(token)).rejects.toThrowError(
-        'Invalid token [object Object]',
-      );
+      const mockUser = {
+        id: '1',
+        auth0Id: 'auth0|111',
+        name: 'auth_test1',
+        email: '',
+        isActive: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest.spyOn(authzService as any, 'verifyJwt').mockResolvedValue({
+        sub: mockUser.auth0Id,
+      });
+
+      jest.spyOn(usersService, 'user').mockResolvedValue(mockUser);
+
+      const { user, userErrors } = await authzService.signin(token);
+
+      expect(user).toBeNull();
+      expect(userErrors).toHaveLength(1);
+      expect(userErrors[0].message).toBe('User is not active');
+      expect(userErrors[0].field).toBeNull();
     });
   });
 });

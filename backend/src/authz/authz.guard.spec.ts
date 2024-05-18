@@ -38,4 +38,27 @@ describe('AuthzGuard', () => {
     jest.spyOn(guard, 'canActivate').mockReturnValue(true);
     expect(guard.canActivate(context)).toBe(true);
   });
+
+  it('should throw UnauthorizedException if user is not defined', () => {
+    const context = {
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
+    } as unknown as ExecutionContext;
+    expect(() => guard.handleRequest(null, null, null, context)).toThrow();
+  });
+
+  it('should throw UnauthorizedException if token is expired', () => {
+    const context = {
+      getHandler: jest.fn(),
+      getClass: jest.fn(),
+    } as unknown as ExecutionContext;
+    expect(() =>
+      guard.handleRequest(
+        null,
+        null,
+        'TokenExpiredError: jwt expired',
+        context,
+      ),
+    ).toThrow();
+  });
 });

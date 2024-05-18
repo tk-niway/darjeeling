@@ -17,9 +17,7 @@ describe('JwtStrategy', () => {
           useValue: {
             // Mock the necessary methods of the UsersService
             // to validate the payload and return a user
-            user: jest
-              .fn()
-              .mockResolvedValue({ id: 'testUserId' } as User),
+            user: jest.fn().mockResolvedValue({ id: 'testUserId' } as User),
           },
         },
       ],
@@ -35,6 +33,12 @@ describe('JwtStrategy', () => {
 
   it('should validate the payload and return a user', async () => {
     const payload = { sub: 'testUserId' };
+
+    jest.spyOn(usersService, 'user').mockResolvedValue({
+      id: 'testUserId',
+      isActive: true,
+    } as User);
+
     const user = await strategy.validate(payload);
     expect(user).toBeDefined();
     expect(user.id).toBe('testUserId');
@@ -45,6 +49,18 @@ describe('JwtStrategy', () => {
     jest.spyOn(usersService, 'user').mockImplementation(() => {
       throw new UnauthorizedException('Unauthorized');
     });
+
+    await expect(strategy.validate(payload)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
+
+  it('should throw an UnauthorizedException if the user is not active', async () => {
+    const payload = { sub: 'inactiveUserId' };
+    jest.spyOn(usersService, 'user').mockResolvedValue({
+      id: 'inactiveUserId',
+      isActive: false,
+    } as User);
 
     await expect(strategy.validate(payload)).rejects.toThrow(
       UnauthorizedException,

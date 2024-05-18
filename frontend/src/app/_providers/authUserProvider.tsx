@@ -36,8 +36,9 @@ export const AuthUserContext = createContext<AuthUserContextType>(
  */
 export const AuthUserProvider = ({
   children,
+  user = {} as User,
 }: AuthUserProviderOptions): JSX.Element => {
-  const [authUser, setAuthUser] = useState<User>({} as User);
+  const [authUser, setAuthUser] = useState<User>(user);
   const { token, setToken } = useToken();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

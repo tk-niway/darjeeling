@@ -44,4 +44,5 @@ export type AuthUserContextType = {
  */
 export type AuthUserProviderOptions = {
   children?: ReactNode;
+  user?: User
 };

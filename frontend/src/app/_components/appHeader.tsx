@@ -50,7 +50,7 @@ export default function AppHeader() {
                 onClick={handleMenu}
                 color="inherit"
               >
-                <AccountCircle />
+                <AccountCircle data-testid="profile-button" />
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -69,15 +69,28 @@ export default function AppHeader() {
               >
                 <MenuItem onClick={handleClose}>Profile</MenuItem>
                 <MenuItem onClick={handleClose}>My account</MenuItem>
-                <MenuItem onClick={() => signout()}>サインアウト</MenuItem>
+                <MenuItem
+                  data-testid="signout-button"
+                  onClick={() => signout()}
+                >
+                  サインアウト
+                </MenuItem>
               </Menu>
             </div>
           ) : (
             <>
-              <Button color="inherit" onClick={() => loginWithRedirect()}>
+              <Button
+                color="inherit"
+                data-testid="signin-button"
+                onClick={() => loginWithRedirect()}
+              >
                 Sign in
               </Button>
-              <Button color="inherit" onClick={() => loginWithRedirect()}>
+              <Button
+                color="inherit"
+                data-testid="signup-button"
+                onClick={() => loginWithRedirect()}
+              >
                 Sign up
               </Button>
             </>

@@ -1,15 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { authFilePath } from "../../playwright.config";
+
+test.use({ storageState: authFilePath });
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000/");
-  await expect(page.getByText(/Sign up/)).toBeVisible();
-  await page.click('[data-testid="signup-button"]');
-  // await page.waitForTimeout(3000);
-  await page.waitForSelector('input[type="text"]');
-  await page.getByLabel("Email address").fill(process.env.E2E_EMAIL || "");
-  await page.getByLabel("Password").fill(process.env.E2E_PASSWORD || "");
-  await page.click('button[type="submit"]');
-  await page.waitForSelector('[data-testid="profile-button"]');
+  await page.goto("/");
 });
 
 test.describe("signed in", () => {

@@ -15,8 +15,8 @@
     "codegen": "graphql-codegen --config codegen.yml",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e": "playwright test --workers=1",
+    "test:e2e:ui": "playwright test --ui --workers=1"
   },
   "dependencies": {
     "@apollo/client": "^3.10.3",

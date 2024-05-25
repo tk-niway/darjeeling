@@ -1,23 +1,24 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
 import { Public } from 'src/authz/decorators/public.decorator';
+import { FilesService } from 'src/files/files.service';
 
 @Resolver()
 export class FilesResolver {
-  constructor() {}
+  constructor(private filesService: FilesService) {}
 
   @Public()
   @Mutation(() => Boolean)
   async upload(
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
-  ): Promise<boolean> {
+  ) {
     console.log(`★start upload : ${JSON.stringify(file)}`);
-    // const { readStream, ...another } = file;
-    // console.log(`★start upload : ${JSON.stringify(another)}`);
+    const result = this.filesService.store(file);
 
-    // const chunks = [];
-    // readStream.on('data', (buf) => chunks.push(buf));
-    // readStream.on('end', () => console.log(Buffer.concat(chunks).toString()));
+    if (!result) {
+      throw new Error('Internal Server Error');
+    }
+
     return true;
   }
 }

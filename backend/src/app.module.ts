@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { APP_GUARD } from '@nestjs/core';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -17,6 +18,10 @@ import { FilesModule } from 'src/files/files.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'storage', 'public'),
+      serveRoot: '/files',
     }),
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,

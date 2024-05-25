@@ -11,6 +11,7 @@ import { AppService } from 'src/app.service';
 import { UsersModule } from 'src/users/users.module';
 import { AuthzModule } from 'src/authz/authz.module';
 import { AuthzGuard } from 'src/authz/authz.guard';
+import { FilesModule } from 'src/files/files.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthzGuard } from 'src/authz/authz.guard';
     PrismaModule,
     UsersModule,
     AuthzModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [

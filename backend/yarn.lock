@@ -1935,6 +1935,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/validator@npm:^13.11.8":
+  version: 13.11.10
+  resolution: "@types/validator@npm:13.11.10"
+  checksum: fe63a20fa90d3e8c661d0ac5b5af162cdd387b9e8fd67f5a0a00ca308e4e2d7602467cc32ef3e2c979b737629fa9e2ff593d3946ee4f8667bbb80af0494b9c66
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.3
   resolution: "@types/yargs-parser@npm:21.0.3"
@@ -2665,17 +2672,20 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^5.59.11"
     "@typescript-eslint/parser": "npm:^5.59.11"
     class-transformer: "npm:^0.5.1"
+    class-validator: "npm:^0.14.1"
     dotenv: "npm:^16.4.5"
     eslint: "npm:^8.42.0"
     eslint-config-prettier: "npm:^8.8.0"
     eslint-plugin-prettier: "npm:^4.2.1"
     graphql: "npm:^16.8.1"
     graphql-type-json: "npm:^0.3.2"
+    graphql-upload-minimal: "npm:^1.6.1"
     jest: "npm:^29.5.0"
     jsonwebtoken: "npm:^9.0.2"
     jwk-to-pem: "npm:^2.0.5"
     jwks-rsa: "npm:^3.1.0"
     mercurius: "npm:^14.0.0"
+    mercurius-upload: "npm:^7.0.0"
     passport: "npm:^0.7.0"
     passport-jwt: "npm:^4.0.1"
     prettier: "npm:^2.8.8"
@@ -2861,7 +2871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"busboy@npm:^1.0.0":
+"busboy@npm:^1.0.0, busboy@npm:^1.6.0":
   version: 1.6.0
   resolution: "busboy@npm:1.6.0"
   dependencies:
@@ -3031,6 +3041,17 @@ __metadata:
   version: 0.5.1
   resolution: "class-transformer@npm:0.5.1"
   checksum: 19809914e51c6db42c036166839906420bb60367df14e15f49c45c8c1231bf25ae661ebe94736ee29cc688b77101ef851a8acca299375cc52fc141b64acde18a
+  languageName: node
+  linkType: hard
+
+"class-validator@npm:^0.14.1":
+  version: 0.14.1
+  resolution: "class-validator@npm:0.14.1"
+  dependencies:
+    "@types/validator": "npm:^13.11.8"
+    libphonenumber-js: "npm:^1.10.53"
+    validator: "npm:^13.9.0"
+  checksum: 946e914e47548b5081449c720ea6a4877bac63dc960e14fca4b990b56e64efe3802d12f07ec22d6420c290245b72ea2d646939239f2a3b597794e6c4c2a4f2ae
   languageName: node
   linkType: hard
 
@@ -4648,6 +4669,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"graphql-upload-minimal@npm:^1.5.5, graphql-upload-minimal@npm:^1.6.1":
+  version: 1.6.1
+  resolution: "graphql-upload-minimal@npm:1.6.1"
+  dependencies:
+    busboy: "npm:^1.6.0"
+  peerDependencies:
+    graphql: 0.13.1 - 16
+  checksum: 06c9d8b4614badf2e9e515c1fbc877bad997cd5fa81bb356fb556c83b44d29b8429cb5ffb7ecdfeafd159c5a3be3cf6075402bfb488e9192527be208814cb29b
+  languageName: node
+  linkType: hard
+
 "graphql-ws@npm:5.14.3":
   version: 5.14.3
   resolution: "graphql-ws@npm:5.14.3"
@@ -5874,6 +5906,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libphonenumber-js@npm:^1.10.53":
+  version: 1.11.1
+  resolution: "libphonenumber-js@npm:1.11.1"
+  checksum: 003b0b39f9d4b246985723e93b744bafa0d6d12a6f393fe3b883add8db1c5189bad33d330550517aee0670c1c371573bda35a0950f0d0d54b6a7bab1a5f64466
+  languageName: node
+  linkType: hard
+
 "light-my-request@npm:5.12.0, light-my-request@npm:^5.11.0":
   version: 5.12.0
   resolution: "light-my-request@npm:5.12.0"
@@ -6129,6 +6168,18 @@ __metadata:
   dependencies:
     fs-monkey: "npm:^1.0.4"
   checksum: 038fc81bce17ea92dde15aaa68fa0fdaf4960c721ce3ffc7c2cb87a259333f5159784ea48b3b72bf9e054254d9d0d0d5209d0fdc3d07d08653a09933b168fbd7
+  languageName: node
+  linkType: hard
+
+"mercurius-upload@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "mercurius-upload@npm:7.0.0"
+  dependencies:
+    fastify-plugin: "npm:^4.2.0"
+    graphql-upload-minimal: "npm:^1.5.5"
+  peerDependencies:
+    graphql: ^16.3.0
+  checksum: 5bdc070aa8a557b515294b1572e869a353ab597294a2871f5059c06a36aa937f76c550bf75d0511415acbddb7e0feb334e39beb946e54e45d7782457ca3ac711
   languageName: node
   linkType: hard
 
@@ -8528,6 +8579,13 @@ __metadata:
     "@types/istanbul-lib-coverage": "npm:^2.0.1"
     convert-source-map: "npm:^2.0.0"
   checksum: e691ba4dd0dea4a884e52c37dbda30cce6f9eeafe9b26721e449429c6bb0f4b6d1e33fabe7711d0f67f7a34c3bfd56c873f7375bba0b1534e6a2843ce99550e5
+  languageName: node
+  linkType: hard
+
+"validator@npm:^13.9.0":
+  version: 13.12.0
+  resolution: "validator@npm:13.12.0"
+  checksum: 21d48a7947c9e8498790550f56cd7971e0e3d724c73388226b109c1bac2728f4f88caddfc2f7ed4b076f9b0d004316263ac786a17e9c4edf075741200718cd32
   languageName: node
   linkType: hard
 

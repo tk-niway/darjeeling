@@ -3,10 +3,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { APP_GUARD } from '@nestjs/core';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { MercuriusDriver, MercuriusDriverConfig } from '@nestjs/mercurius';
+import { config } from 'src/config/main.config';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { AppController } from 'src/app.controller';
 import { AppService } from 'src/app.service';
 import { UsersModule } from 'src/users/users.module';
@@ -18,10 +17,8 @@ import { FilesModule } from 'src/files/files.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'storage', 'public'),
-      serveRoot: '/files',
+      cache: true,
+      load: [config],
     }),
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
@@ -41,7 +38,6 @@ import { FilesModule } from 'src/files/files.module';
       useClass: AuthzGuard,
     },
     AppService,
-    PrismaService,
   ],
 })
 export class AppModule {}

@@ -17,6 +17,8 @@ export type Scalars = {
   Float: { input: number; output: number; }
   /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: { input: any; output: any; }
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: { input: any; output: any; }
 };
 
 export type BoolFieldUpdateOperationsInput = {
@@ -49,6 +51,7 @@ export type Mutation = {
   deleteUser: User;
   signup: UserWithError;
   updateUser: User;
+  upload: Scalars['Boolean']['output'];
 };
 
 
@@ -65,6 +68,11 @@ export type MutationDeleteUserArgs = {
 export type MutationUpdateUserArgs = {
   data: UserUpdateInput;
   where: UserWhereUniqueInput;
+};
+
+
+export type MutationUploadArgs = {
+  file: Scalars['Upload']['input'];
 };
 
 export type NestedBoolFilter = {
@@ -343,6 +351,7 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   StringFieldUpdateOperationsInput: StringFieldUpdateOperationsInput;
   StringFilter: StringFilter;
+  Upload: ResolverTypeWrapper<Scalars['Upload']['output']>;
   User: ResolverTypeWrapper<User>;
   UserCreateInput: UserCreateInput;
   UserEdge: ResolverTypeWrapper<UserEdge>;
@@ -375,6 +384,7 @@ export type ResolversParentTypes = {
   String: Scalars['String']['output'];
   StringFieldUpdateOperationsInput: StringFieldUpdateOperationsInput;
   StringFilter: StringFilter;
+  Upload: Scalars['Upload']['output'];
   User: User;
   UserCreateInput: UserCreateInput;
   UserEdge: UserEdge;
@@ -395,6 +405,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'where'>>;
   signup?: Resolver<ResolversTypes['UserWithError'], ParentType, ContextType>;
   updateUser?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'data' | 'where'>>;
+  upload?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationUploadArgs, 'file'>>;
 };
 
 export type PageInfoResolvers<ContextType = any, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
@@ -418,6 +429,10 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryUserArgs, 'where'>>;
   users?: Resolver<ResolversTypes['PaginatedUser'], ParentType, ContextType, Partial<QueryUsersArgs>>;
 };
+
+export interface UploadScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Upload'], any> {
+  name: 'Upload';
+}
 
 export type UserResolvers<ContextType = any, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   auth0Id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -454,6 +469,7 @@ export type Resolvers<ContextType = any> = {
   PageInfo?: PageInfoResolvers<ContextType>;
   PaginatedUser?: PaginatedUserResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Upload?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;
   UserEdge?: UserEdgeResolvers<ContextType>;
   UserError?: UserErrorResolvers<ContextType>;

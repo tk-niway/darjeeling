@@ -16,6 +16,7 @@ import { RetryLink } from "@apollo/client/link/retry";
 import { GetTokenSilentlyOptions, useAuth0 } from "@auth0/auth0-react";
 import { ENV } from "@/utils/consts";
 import { AuthApolloContextType, AuthApolloProviderOptions } from "@/types";
+import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 export const AuthApolloContext = createContext<AuthApolloContextType>(
   {} as AuthApolloContextType
@@ -29,9 +30,10 @@ export const AuthApolloProvider = ({
 
   const retryLink = new RetryLink();
 
-  const httpLink = new HttpLink({
+  // NOTE: This is a workaround to use apollo-upload-client
+  const httpLink = createUploadLink({
     uri: endpointGraphql,
-  });
+  }) as unknown as HttpLink;
 
   const authLink = setContext((_, { headers }) => {
     return {

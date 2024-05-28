@@ -12,6 +12,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthzModule } from 'src/authz/authz.module';
 import { AuthzGuard } from 'src/authz/authz.guard';
 import { FilesModule } from 'src/files/files.module';
+import { VideosModule } from 'src/videos/videos.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { FilesModule } from 'src/files/files.module';
     UsersModule,
     AuthzModule,
     FilesModule,
+    VideosModule,
   ],
   controllers: [AppController],
   providers: [

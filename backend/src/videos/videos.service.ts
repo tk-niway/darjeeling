@@ -50,4 +50,18 @@ export class VideosService {
         .run();
     });
   }
+
+  getVideo(videoId: string): string | null {
+    console.log('Getting video', { videoId });
+
+    const filePath = join(
+      this.configService.get('filepath.privateFileDir'),
+      videoId,
+      videoId + '.m3u8',
+    );
+    console.log({ filePath, exist: existsSync(filePath) });
+    if (!existsSync(filePath)) return null;
+
+    return filePath;
+  }
 }

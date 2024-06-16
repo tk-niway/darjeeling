@@ -1,4 +1,11 @@
-import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Res,
+  StreamableFile,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { createReadStream } from 'fs';
 import { resolve } from 'path';
@@ -12,12 +19,13 @@ export class VideosController {
   @Public()
   @Get(':videoId')
   async streamVideo(@Param('videoId') videoId: string, @Res() res: Response) {
+    console.log('Streaming video', { videoId });
     const filePath = this.videosService.getVideo(videoId);
 
     if (filePath === null) return new NotFoundException('Video not found');
 
     const stream = createReadStream(resolve(filePath));
 
-    return res.send(stream);
+    return new StreamableFile(stream);
   }
 }

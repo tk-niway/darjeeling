@@ -18,10 +18,11 @@ const VideoPlayer = () => {
       <h1>Video Player</h1>
       {isMounted && (
         <ReactPlayer
-          url="http://localhost:3333/files/test_vio/test_vio.m3u8"
+          url="http://localhost:3333/files/videoplayback/videoplayback.m3u8"
           controls
           autoplay
           muted
+          playsinline
           onError={handlePlayerError}
         />
       )}

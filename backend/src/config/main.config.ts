@@ -1,6 +1,7 @@
-import {join} from 'path';
+import { join } from 'path';
+import { IConfig } from 'src/config/config.interface';
 
-export function config() {
+export function config(): IConfig {
   const testing = process.env.NODE_ENV !== 'production';
   return {
     testing,
@@ -18,8 +19,9 @@ export function config() {
       issuer: process.env.AUTH0_ISSUER || 'example.auth0.com/',
     },
     filepath: {
-      publicFiles: join(process.cwd(), 'storage', 'public'),
+      publicFileDir: join(process.cwd(), 'storage', 'public'),
       publicFilesPrefix: '/files',
+      privateFileDir: join(process.cwd(), 'storage', 'private'),
     },
   };
 }

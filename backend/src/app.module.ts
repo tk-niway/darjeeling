@@ -13,12 +13,14 @@ import { AuthzModule } from 'src/authz/authz.module';
 import { AuthzGuard } from 'src/authz/authz.guard';
 import { FilesModule } from 'src/files/files.module';
 import { VideosModule } from 'src/videos/videos.module';
+import { validationSchema } from 'src/config/config.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
+      validationSchema,
       load: [config],
     }),
     GraphQLModule.forRoot<MercuriusDriverConfig>({

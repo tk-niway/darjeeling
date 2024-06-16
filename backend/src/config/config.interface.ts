@@ -1,14 +1,6 @@
-import { IsNotEmpty, IsNotEmptyObject } from 'class-validator';
-
-export class IConfig {
-  @IsNotEmpty()
+export interface IConfig {
   testing: boolean;
-
-  @IsNotEmpty()
   port: number;
-
-  @IsNotEmpty()
-  @IsNotEmptyObject()
   db: {
     port: number;
     host: string;
@@ -17,18 +9,13 @@ export class IConfig {
     database: string;
     provider: string;
   };
-
-  @IsNotEmpty()
-  @IsNotEmptyObject()
   auth0: {
     audience: string;
     issuer: string;
   };
-
-  @IsNotEmpty()
-  @IsNotEmptyObject()
   filepath: {
-    publicFiles: string;
+    publicFileDir: string;
     publicFilesPrefix: string;
+    privateFileDir: string;
   };
 }

@@ -48,6 +48,7 @@
     "graphql": "^16.8.1",
     "graphql-type-json": "^0.3.2",
     "graphql-upload-minimal": "^1.6.1",
+    "joi": "^17.13.1",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.5",
     "jwks-rsa": "^3.1.0",

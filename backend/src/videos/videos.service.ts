@@ -64,4 +64,18 @@ export class VideosService {
 
     return filePath;
   }
+
+  getVideoFile(videoId: string, filename: string): string | null {
+    console.log('Getting video', { videoId });
+
+    const filePath = join(
+      this.configService.get('filepath.privateFileDir'),
+      videoId,
+      filename,
+    );
+    console.log({ filePath, exist: existsSync(filePath) });
+    if (!existsSync(filePath)) return null;
+
+    return filePath;
+  }
 }

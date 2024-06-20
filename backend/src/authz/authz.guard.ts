@@ -6,21 +6,23 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
-import { IS_PUBLIC_KEY } from 'src/authz/decorators/public.decorator';
-import { convertReq, convertRes } from 'src/utils';
+import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
 export class AuthzGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(
+    private reflector: Reflector,
+    private utilsService: UtilsService,
+  ) {
     super();
   }
 
   getRequest(context: ExecutionContext) {
-    return convertReq(context);
+    return this.utilsService.convertReq(context);
   }
 
   getResponse(context: ExecutionContext) {
-    return convertRes(context);
+    return this.utilsService.convertRes(context);
   }
 
   handleRequest(
@@ -40,16 +42,11 @@ export class AuthzGuard extends AuthGuard('jwt') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    // const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-    //   context.getHandler(),
-    //   context.getClass(),
-    // ]);
-    // if (isPublic) return true;
+    const request = this.utilsService.convertReq(context);
 
-    const request = context.switchToHttp().getRequest();
-
+    // If the request does not have an authorization header, the user is guest
     if (
-      !request?.headers?.authorization ||
+      !request.headers.authorization ||
       request.headers.authorization === ''
     ) {
       request.user = {};
@@ -57,6 +54,7 @@ export class AuthzGuard extends AuthGuard('jwt') {
       return true;
     }
 
+    // If the request has an authorization header, the request proceeds to validation by the JwtAuthGuard
     return super.canActivate(context);
   }
 }

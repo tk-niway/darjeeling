@@ -14,6 +14,7 @@ import { AuthzGuard } from 'src/authz/authz.guard';
 import { FilesModule } from 'src/files/files.module';
 import { VideosModule } from 'src/videos/videos.module';
 import { validationSchema } from 'src/config/config.validation';
+import { UtilsModule } from 'src/utils/utils.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { validationSchema } from 'src/config/config.validation';
     AuthzModule,
     FilesModule,
     VideosModule,
+    UtilsModule,
   ],
   controllers: [AppController],
   providers: [

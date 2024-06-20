@@ -7,16 +7,16 @@ import { UpdateOneUserArgs } from 'src/generated/user/update-one-user.args';
 import { DeleteOneUserArgs } from 'src/generated/user/delete-one-user.args';
 import { User } from 'src/generated/user/user.model';
 import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
-import {
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PaginatedUser } from 'src/users/models/paginatedUser.model';
-import { generateEdges, generatePageInfo } from 'src/utils';
+import { UtilsService } from 'src/utils/utils.service';
 
 @Resolver((of: any) => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private utilsService: UtilsService,
+  ) {}
 
   @Query((returns) => User)
   async user(@Args() { where }: FindUniqueUserArgs): Promise<User> {
@@ -43,9 +43,14 @@ export class UsersResolver {
 
     const totalCount = await this.usersService.totalCount({ where });
 
-    const edges = generateEdges(users);
+    const edges = this.utilsService.generateEdges(users);
 
-    const pageInfo = generatePageInfo({ skip, take, totalCount, edges });
+    const pageInfo = this.utilsService.generatePageInfo({
+      skip,
+      take,
+      totalCount,
+      edges,
+    });
 
     return { edges, pageInfo, totalCount, nodes: users };
   }

@@ -1,9 +1,10 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { convertReq } from 'src/utils';
+import { UtilsService } from 'src/utils/utils.service';
 
 export const Token = createParamDecorator(
   (_data: unknown, context: ExecutionContext) => {
-    const request = convertReq(context);
+    const utilsService = new UtilsService();
+    const request = utilsService.convertReq(context);
 
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
 

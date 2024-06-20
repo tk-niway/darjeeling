@@ -1,6 +1,7 @@
 export interface IConfig {
   testing: boolean;
   port: number;
+  frontendUrl: string;
   db: {
     port: number;
     host: string;

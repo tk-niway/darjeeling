@@ -6,6 +6,7 @@ export function config(): IConfig {
   return {
     testing,
     port: parseInt(process.env.PORT, 10) || 3000,
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000/',
     db: {
       port: parseInt(process.env.DB_PORT, 10) || 3306,
       host: process.env.DB_HOST || 'localhost',

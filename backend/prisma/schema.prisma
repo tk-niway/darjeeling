@@ -26,6 +26,39 @@ model User {
   email     String   @unique
   name      String   @db.Text
   isActive  Boolean  @default(true)
+  ownVideos        Video[] @relation(name:"ownerRelation")
+  invitedVideos    Video[] @relation(name:"guestRelation")
   createdAt DateTime @default(dbgenerated("NOW(3)"))
   updatedAt DateTime @default(dbgenerated("NOW(3) ON UPDATE NOW(3)"))
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  thumbnailUrl  String?
+  url         String?
+  duration    Int?
+  visibility    videoVisibility @default(private)
+  uploadStatus  videoUploadStatus @default(pending)
+  Owner       User @relation(fields: [ownerId], references: [id], name:"ownerRelation")
+  ownerId     String
+  guests      User[] @relation(name:"guestRelation")
+  playCount   Int @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(dbgenerated("NOW(3)"))
+  updatedAt   DateTime @default(dbgenerated("NOW(3) ON UPDATE NOW(3)"))
+}
+
+enum videoUploadStatus{
+  pending
+  processing
+  completed
+  failed
+}
+
+enum videoVisibility{
+  public
+  private
+  limited
 }

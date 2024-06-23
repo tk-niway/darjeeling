@@ -73,4 +73,15 @@ export class UtilsService {
       endCursor: this.generateEndCursor(edges),
     };
   }
+
+  splitFilename(filename: string): { name: string; extension: string } {
+    const dotIndex = filename.lastIndexOf('.');
+
+    if (dotIndex === -1) return { name: filename, extension: '' }; // 拡張子がない場合
+
+    return {
+      name: filename.substring(0, dotIndex),
+      extension: filename.substring(dotIndex + 1),
+    };
+  }
 }

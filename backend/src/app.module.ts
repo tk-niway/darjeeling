@@ -11,7 +11,6 @@ import { AppService } from 'src/app.service';
 import { UsersModule } from 'src/users/users.module';
 import { AuthzModule } from 'src/authz/authz.module';
 import { AuthzGuard } from 'src/authz/authz.guard';
-import { FilesModule } from 'src/files/files.module';
 import { VideosModule } from 'src/videos/videos.module';
 import { validationSchema } from 'src/config/config.validation';
 import { UtilsModule } from 'src/utils/utils.module';
@@ -33,7 +32,6 @@ import { UtilsModule } from 'src/utils/utils.module';
     PrismaModule,
     UsersModule,
     AuthzModule,
-    FilesModule,
     VideosModule,
     UtilsModule,
   ],

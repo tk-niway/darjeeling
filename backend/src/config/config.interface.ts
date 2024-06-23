@@ -1,7 +1,10 @@
 export interface IConfig {
   testing: boolean;
   port: number;
+  backendUrl: string;
   frontendUrl: string;
+  videoUrl: string;
+  fileUrl: string;
   db: {
     port: number;
     host: string;
@@ -14,9 +17,7 @@ export interface IConfig {
     audience: string;
     issuer: string;
   };
-  filepath: {
-    publicFileDir: string;
-    publicFilesPrefix: string;
-    privateFileDir: string;
-  };
+  publicDirPrefix: string;
+  publicDirPath: string;
+  videosDirPath: string;
 }

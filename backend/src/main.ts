@@ -27,8 +27,8 @@ async function bootstrap() {
   });
   app.register(mercuriusUpload);
   app.register(fastifyStatic, {
-    root: configService.get('filepath.publicFileDir', { infer: true }),
-    prefix: configService.get('filepath.publicFilesPrefix', { infer: true }),
+    root: configService.get('publicDirPath'),
+    prefix: configService.get('publicDirPrefix'),
     decorateReply: true,
   });
 

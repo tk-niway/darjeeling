@@ -14,6 +14,9 @@ import { IConfig } from 'src/config/config.interface';
 import { UtilsService } from 'src/utils/utils.service';
 import { rm } from 'fs/promises';
 import { DeleteOneVideoArgs } from 'src/generated/video/delete-one-video.args';
+import { FindUniqueVideoArgs } from 'src/generated/video/find-unique-video.args';
+import { FindManyVideoArgs } from 'src/generated/video/find-many-video.args';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class VideosService {
@@ -24,12 +27,23 @@ export class VideosService {
   ) {}
 
   private EXT_M3U8 = '.m3u8';
-
   private EXT_JPG = '.jpg';
 
-  async video(videoId: string) {}
+  async totalCount(params: Prisma.VideoAggregateArgs): Promise<number> {
+    const video = await this.prismaService.video.aggregate({
+      where: { ...params.where },
+      _count: true,
+    });
+    return video._count;
+  }
 
-  async videos() {}
+  async video(data: FindUniqueVideoArgs) {
+    return await this.prismaService.video.findUnique(data);
+  }
+
+  async videos(query: FindManyVideoArgs) {
+    return await this.prismaService.video.findMany(query);
+  }
 
   async createVideo(
     data: Parameters<PrismaService['video']['create']>[0],

@@ -10,7 +10,7 @@ type JWKFile = {
   keys: jwkToPem.JWK[];
 };
 
-type AuthzUser = {
+type AuthUser = {
   sub: string; //'auth0|1111e1111',
   name: string; //'sample_email@example.co.jp',
   email?: string; //'sample_email@example.co.jp',
@@ -31,7 +31,7 @@ type DecodedToken = {
 };
 
 @Injectable()
-export class AuthzService {
+export class AuthService {
   private issuer: string;
 
   constructor(
@@ -42,10 +42,10 @@ export class AuthzService {
   }
 
   async signup(token: string): Promise<UserWithError> {
-    const authzUser = await this.fetchUser(token);
+    const authUser = await this.fetchUser(token);
 
     const user = await this.usersService.user({
-      auth0Id: authzUser.sub,
+      auth0Id: authUser.sub,
     });
 
     // the user is forbidden to signin
@@ -57,9 +57,9 @@ export class AuthzService {
     }
 
     const createdUser = await this.usersService.createUser({
-      auth0Id: authzUser.sub,
-      email: authzUser.email,
-      name: authzUser.name,
+      auth0Id: authUser.sub,
+      email: authUser.email,
+      name: authUser.name,
     });
 
     return { user: createdUser, userErrors: [] };
@@ -130,7 +130,7 @@ export class AuthzService {
     );
   };
 
-  private async fetchUser(token: string): Promise<AuthzUser> {
+  private async fetchUser(token: string): Promise<AuthUser> {
     try {
       const response = await fetch(`https://${this.issuer}/userinfo`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -139,18 +139,18 @@ export class AuthzService {
       if (!response.ok)
         throw new UnauthorizedException('Unable to fetch user info');
 
-      const authzUser = await response.json();
+      const authUser = await response.json();
 
-      if (!this.isAuthzUser(authzUser))
-        throw new UnauthorizedException(`Invalid user info ${{ authzUser }}`);
+      if (!this.isAuthUser(authUser))
+        throw new UnauthorizedException(`Invalid user info ${{ authUser }}`);
 
-      return authzUser;
+      return authUser;
     } catch (error) {
       throw new UnauthorizedException(error);
     }
   }
 
-  private isAuthzUser(data: any): boolean {
+  private isAuthUser(data: any): boolean {
     return data && data.sub && typeof data.sub === 'string';
   }
 }

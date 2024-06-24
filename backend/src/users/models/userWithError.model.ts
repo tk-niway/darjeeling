@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { UserError } from 'src/lib/models/userError.model';
+import { UserError } from 'src/common/models/userError.model';
 import { UserModel } from 'src/users/models/user.model';
 
 // @ObjectType()

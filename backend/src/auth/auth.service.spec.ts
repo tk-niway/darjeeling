@@ -1,24 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthzService } from './authz.service';
+import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-describe('AuthzService', () => {
-  let authzService: AuthzService;
+describe('AuthService', () => {
+  let authService: AuthService;
   let usersService: UsersService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthzService, UsersService, ConfigService, PrismaService],
+      providers: [AuthService, UsersService, ConfigService, PrismaService],
     }).compile();
 
-    authzService = module.get<AuthzService>(AuthzService);
+    authService = module.get<AuthService>(AuthService);
     usersService = module.get<UsersService>(UsersService);
   });
 
   it('should be defined', () => {
-    expect(authzService).toBeDefined();
+    expect(authService).toBeDefined();
   });
 
   describe('signup', () => {
@@ -31,7 +31,7 @@ describe('AuthzService', () => {
       };
 
       jest
-        .spyOn(authzService as any, 'fetchUser')
+        .spyOn(authService as any, 'fetchUser')
         .mockResolvedValue(fetchUserSpy);
 
       jest.spyOn(usersService, 'createUser').mockResolvedValue({
@@ -44,7 +44,7 @@ describe('AuthzService', () => {
         updatedAt: new Date(),
       });
 
-      const { user } = await authzService.signup(token);
+      const { user } = await authService.signup(token);
       expect(user).toBeDefined();
       expect(user).toHaveProperty('id');
       expect(user).toHaveProperty('auth0Id');
@@ -64,7 +64,7 @@ describe('AuthzService', () => {
       };
 
       jest
-        .spyOn(authzService as any, 'fetchUser')
+        .spyOn(authService as any, 'fetchUser')
         .mockResolvedValue(fetchUserSpy);
 
       jest.spyOn(usersService, 'user').mockResolvedValue({
@@ -77,7 +77,7 @@ describe('AuthzService', () => {
         updatedAt: new Date(),
       });
 
-      const { user, userErrors } = await authzService.signup(token);
+      const { user, userErrors } = await authService.signup(token);
 
       expect(user).toBeNull();
       expect(userErrors).toHaveLength(1);
@@ -99,13 +99,13 @@ describe('AuthzService', () => {
         updatedAt: new Date(),
       };
 
-      jest.spyOn(authzService as any, 'verifyJwt').mockResolvedValue({
+      jest.spyOn(authService as any, 'verifyJwt').mockResolvedValue({
         sub: mockUser.auth0Id,
       });
 
       jest.spyOn(usersService, 'user').mockResolvedValue(mockUser);
 
-      const { user } = await authzService.signin(token);
+      const { user } = await authService.signin(token);
 
       expect(user).toBeDefined();
       expect(user).toHaveProperty('id');
@@ -129,13 +129,13 @@ describe('AuthzService', () => {
         updatedAt: new Date(),
       };
 
-      jest.spyOn(authzService as any, 'verifyJwt').mockResolvedValue({
+      jest.spyOn(authService as any, 'verifyJwt').mockResolvedValue({
         sub: mockUser.auth0Id,
       });
 
       jest.spyOn(usersService, 'user').mockResolvedValue(mockUser);
 
-      const { user, userErrors } = await authzService.signin(token);
+      const { user, userErrors } = await authService.signin(token);
 
       expect(user).toBeNull();
       expect(userErrors).toHaveLength(1);

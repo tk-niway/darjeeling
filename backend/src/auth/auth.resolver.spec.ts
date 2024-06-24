@@ -1,19 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthzResolver } from 'src/authz/authz.resolver';
-import { AuthzService } from 'src/authz/authz.service';
+import { AuthResolver } from 'src/auth/auth.resolver';
+import { AuthService } from 'src/auth/auth.service';
 import { ConfigService } from '@nestjs/config';
-import { JwtStrategy } from 'src/authz/jwt.strategy';
+import { JwtStrategy } from 'src/common/strategies/jwt.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 
-describe('AuthzResolver', () => {
-  let resolver: AuthzResolver;
+describe('AuthResolver', () => {
+  let resolver: AuthResolver;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AuthzResolver,
-        AuthzService,
+        AuthResolver,
+        AuthService,
         ConfigService,
         JwtStrategy,
         PrismaService,
@@ -21,7 +21,7 @@ describe('AuthzResolver', () => {
       ],
     }).compile();
 
-    resolver = module.get<AuthzResolver>(AuthzResolver);
+    resolver = module.get<AuthResolver>(AuthResolver);
   });
 
   it('should be defined', () => {

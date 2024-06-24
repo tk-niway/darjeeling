@@ -4,12 +4,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 import { UtilsService } from 'src/utils/utils.service';
 
 @Injectable()
-export class AuthzGuard extends AuthGuard('jwt') {
+export class AuthGuard extends PassportAuthGuard('jwt') {
   constructor(
     private reflector: Reflector,
     private utilsService: UtilsService,

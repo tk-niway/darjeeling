@@ -4,7 +4,6 @@ import {
   Resolver,
   Args,
   ResolveField,
-  ResolveProperty,
   Parent,
 } from '@nestjs/graphql';
 import { UsersService } from 'src/users/users.service';
@@ -13,7 +12,7 @@ import { FindUniqueUserArgs } from 'src/generated/user/find-unique-user.args';
 import { CreateOneUserArgs } from 'src/generated/user/create-one-user.args';
 import { UpdateOneUserArgs } from 'src/generated/user/update-one-user.args';
 import { DeleteOneUserArgs } from 'src/generated/user/delete-one-user.args';
-import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PaginatedUser } from 'src/users/models/paginatedUser.model';
 import { UtilsService } from 'src/utils/utils.service';

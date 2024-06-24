@@ -9,7 +9,7 @@ import {
 import { Response } from 'express';
 import { createReadStream } from 'fs';
 import { RefererGuard } from 'src/common/guards/referer.guard';
-import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { VideosService } from 'src/videos/videos.service';
 import { User } from 'src/generated/user/user.model';
 

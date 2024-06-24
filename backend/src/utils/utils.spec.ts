@@ -1,33 +1,40 @@
-import {
-  hasNextPage,
-  hasPreviousPage,
-  generatePageInfo,
-} from './index';
+import { Test, TestingModule } from '@nestjs/testing';
+import { UtilsService } from 'src/utils/utils.service';
 
 describe('Helper functions', () => {
+  let utilsService: UtilsService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [UtilsService],
+    }).compile();
+
+    utilsService = module.get<UtilsService>(UtilsService);
+  });
+
   describe('hasNextPage', () => {
     it('should return true if there are more pages', () => {
-      expect(hasNextPage(0, 10, 20)).toBe(true);
+      expect(utilsService.hasNextPage(0, 10, 20)).toBe(true);
     });
 
     it('should return false if there are no more pages', () => {
-      expect(hasNextPage(10, 10, 20)).toBe(false);
+      expect(utilsService.hasNextPage(10, 10, 20)).toBe(false);
     });
   });
 
   describe('hasPreviousPage', () => {
     it('should return true if there are previous pages', () => {
-      expect(hasPreviousPage(10)).toBe(true);
+      expect(utilsService.hasPreviousPage(10)).toBe(true);
     });
 
     it('should return false if there are no previous pages', () => {
-      expect(hasPreviousPage(0)).toBe(false);
+      expect(utilsService.hasPreviousPage(0)).toBe(false);
     });
   });
 
   describe('generatePageInfo', () => {
     it('should generate correct page info', () => {
-      const pageInfo = generatePageInfo({
+      const pageInfo = utilsService.generatePageInfo({
         skip: 0,
         take: 10,
         totalCount: 20,

@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthzGuard } from 'src/authz/authz.guard';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
-describe('AuthzGuard', () => {
-  let guard: AuthzGuard;
+describe('AuthGuard', () => {
+  let guard: AuthGuard;
   let reflector: Reflector;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthzGuard, Reflector],
+      providers: [AuthGuard, Reflector],
     }).compile();
 
-    guard = module.get<AuthzGuard>(AuthzGuard);
+    guard = module.get<AuthGuard>(AuthGuard);
     reflector = module.get<Reflector>(Reflector);
   });
 

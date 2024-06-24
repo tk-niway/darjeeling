@@ -9,7 +9,7 @@ import {
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
 import { VideosService } from 'src/videos/videos.service';
 import { MemberGuard } from 'src/common/guards/member.guard';
-import { CurrentUser } from 'src/users/decorators/currentUser.decorator';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { BadRequestException, UseGuards } from '@nestjs/common';
 import { UtilsService } from 'src/utils/utils.service';
 import { Video } from 'src/generated/video/video.model';

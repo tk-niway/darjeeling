@@ -6,30 +6,43 @@ import {
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
+import {
+  ForbiddenException,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { FindManyUserArgs } from 'src/generated/user/find-many-user.args';
 import { FindUniqueUserArgs } from 'src/generated/user/find-unique-user.args';
-import { CreateOneUserArgs } from 'src/generated/user/create-one-user.args';
 import { UpdateOneUserArgs } from 'src/generated/user/update-one-user.args';
 import { DeleteOneUserArgs } from 'src/generated/user/delete-one-user.args';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PaginatedUser } from 'src/users/models/paginatedUser.model';
 import { UtilsService } from 'src/utils/utils.service';
 import { UserModel } from 'src/users/models/user.model';
 import { VideoModel } from 'src/videos/models/video.model';
 import { VideosService } from 'src/videos/videos.service';
 import { FindManyVideoArgs } from 'src/generated/video/find-many-video.args';
+import { MemberGuard } from 'src/common/guards/member.guard';
+import { UserCreateInput } from 'src/generated/user/user-create.input';
 
 @Resolver(() => UserModel)
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
-    private utilsService: UtilsService,
+    private readonly utilsService: UtilsService,
     private readonly videosService: VideosService,
   ) {}
 
-  @ResolveField(() => [VideoModel], { nullable: true, name: 'OwnVideos' })
+  // ------------------------------
+  // ----- Resolver Fields -----
+  // ------------------------------
+
+  @ResolveField(() => [VideoModel], {
+    name: 'OwnVideos',
+    nullable: true,
+    description: 'Videos where the user is the owner',
+  })
   async ownVideos(
     @Parent() user: UserModel,
     @Args() @Args() query: FindManyVideoArgs,
@@ -40,9 +53,28 @@ export class UsersResolver {
     });
   }
 
-  @Query((returns) => UserModel)
-  async user(@Args() { where }: FindUniqueUserArgs): Promise<UserModel> {
-    const user = await this.usersService.user(where);
+  @ResolveField(() => [VideoModel], {
+    name: 'InvitedVideos',
+    nullable: true,
+    description: 'Videos where the user is a guest',
+  })
+  async invitedVideos(
+    @Parent() user: UserModel,
+    @Args() @Args() query: FindManyVideoArgs,
+  ) {
+    return this.videosService.videos({
+      ...query,
+      where: { guests: { some: { id: { equals: user.id } } } },
+    });
+  }
+
+  // ------------------------------
+  // ----- Queries -----
+  // ------------------------------
+
+  @Query((returns) => UserModel, { description: 'Find a user by id or email' })
+  async user(@Args() query: FindUniqueUserArgs): Promise<UserModel> {
+    const user = await this.usersService.user(query);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -77,28 +109,37 @@ export class UsersResolver {
     return { edges, pageInfo, totalCount, nodes: users };
   }
 
+  // ------------------------------
+  // ----- Mutations -----
+  // ------------------------------
+
+  @UseGuards(MemberGuard)
   @Mutation((returns) => UserModel)
-  async createUser(@Args() { data }: CreateOneUserArgs): Promise<UserModel> {
-    return this.usersService.createUser(data);
+  async createUser(@Args("data") query: UserCreateInput): Promise<UserModel> {
+    return this.usersService.createUser(query);
   }
 
-  @Mutation((returns) => UserModel) async updateUser(
+  @UseGuards(MemberGuard)
+  @Mutation((returns) => UserModel)
+  async updateUser(
     @CurrentUser() currentUser: UserModel,
-    @Args() { data, where }: UpdateOneUserArgs,
+    @Args() query: UpdateOneUserArgs,
   ): Promise<UserModel> {
-    if (currentUser.id !== where.id)
+    if (currentUser.id !== query.where.id)
       throw new ForbiddenException('You can only update your own user');
 
-    return this.usersService.updateUser({ where, data });
+    return this.usersService.updateUser(query);
   }
 
-  @Mutation((returns) => UserModel) async deleteUser(
+  @UseGuards(MemberGuard)
+  @Mutation((returns) => UserModel)
+  async deleteUser(
     @CurrentUser() currentUser: UserModel,
-    @Args() { where }: DeleteOneUserArgs,
+    @Args() query: DeleteOneUserArgs,
   ): Promise<UserModel> {
-    if (currentUser.id !== where.id)
+    if (currentUser.id !== query.where.id)
       throw new ForbiddenException('You can only update your own user');
 
-    return this.usersService.deleteUser(where);
+    return this.usersService.deleteUser(query);
   }
 }

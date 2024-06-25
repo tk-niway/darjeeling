@@ -5,35 +5,22 @@ import { UserModel } from 'src/users/models/user.model';
 
 @Injectable()
 export class UsersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async totalCount(params: Prisma.UserAggregateArgs): Promise<number> {
+  async totalCount(query: Prisma.UserAggregateArgs): Promise<number> {
     const users = await this.prismaService.user.aggregate({
-      where: { ...params.where },
+      where: { ...query.where },
       _count: true,
     });
     return users._count;
   }
 
-  async user(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<UserModel> {
-    return await this.prismaService.user.findUnique({
-      where: { ...userWhereUniqueInput },
-    });
+  async user(query: Prisma.UserFindUniqueArgs): Promise<UserModel> {
+    return await this.prismaService.user.findUnique(query);
   }
 
-  async users(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput[];
-  }): Promise<UserModel[]> {
-    return await this.prismaService.user.findMany({
-      ...params,
-      where: { ...params.where },
-    });
+  async users(query: Prisma.UserFindManyArgs): Promise<UserModel[]> {
+    return await this.prismaService.user.findMany(query);
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<UserModel> {
@@ -44,19 +31,12 @@ export class UsersService {
     });
   }
 
-  async updateUser(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<UserModel> {
-    return await this.prismaService.user.update(params);
+  async updateUser(query: Prisma.UserUpdateArgs): Promise<UserModel> {
+    return await this.prismaService.user.update(query);
   }
 
-  async deleteUser(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<UserModel> {
-    const deletedUser = await this.prismaService.user.delete({
-      where: userWhereUniqueInput,
-    });
+  async deleteUser(query: Prisma.UserDeleteArgs): Promise<UserModel> {
+    const deletedUser = await this.prismaService.user.delete(query);
     return deletedUser;
   }
 }

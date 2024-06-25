@@ -121,7 +121,7 @@ export class VideosResolver {
   @ResolveField(() => UserModel, { name: 'Owner' }) async owner(
     @Parent() video: Video,
   ): Promise<UserModel> {
-    return await this.usersService.user({ id: video.ownerId });
+    return await this.usersService.user({ where: { id: video.ownerId } });
   }
 
   @ResolveField(() => [UserModel], { name: 'Guests' })

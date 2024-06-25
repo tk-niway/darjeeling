@@ -45,7 +45,7 @@ export class AuthService {
     const authUser = await this.fetchUser(token);
 
     const user = await this.usersService.user({
-      auth0Id: authUser.sub,
+      where: { auth0Id: authUser.sub },
     });
 
     // the user is forbidden to signin
@@ -75,7 +75,7 @@ export class AuthService {
     }
 
     const user = await this.usersService.user({
-      auth0Id: decodedToken.sub,
+      where: { auth0Id: decodedToken.sub },
     });
 
     // the user is not found

@@ -10,7 +10,11 @@ import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
 import { VideosService } from 'src/videos/videos.service';
 import { MemberGuard } from 'src/common/guards/member.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  UseGuards,
+} from '@nestjs/common';
 import { UtilsService } from 'src/utils/utils.service';
 import { Video } from 'src/generated/video/video.model';
 import { UpdateOneVideoArgs } from 'src/generated/video/update-one-video.args';
@@ -30,6 +34,67 @@ export class VideosResolver {
     private utilsService: UtilsService,
     private usersService: UsersService,
   ) {}
+
+  // ------------------------------
+  // ----- Resolver Fields -----
+  // ------------------------------
+
+  @ResolveField(() => UserModel, { name: 'Owner' }) async owner(
+    @Parent() video: Video,
+  ): Promise<UserModel> {
+    return await this.usersService.user({ where: { id: video.ownerId } });
+  }
+
+  @ResolveField(() => [UserModel], { name: 'Guests' })
+  async getGuests(@Parent() video: Video, @Args() query: FindManyUserArgs) {
+    const { skip, take, cursor, where, orderBy, distinct } =
+      this.utilsService.findManyArgsValidation(query);
+
+    return await this.usersService.users({
+      skip,
+      take,
+      cursor,
+      where: {
+        ...where,
+        invitedVideos: { some: { id: { equals: video.id } } },
+      },
+      orderBy,
+      distinct,
+    });
+  }
+
+  // ------------------------------
+  // ----- Queries -----
+  // ------------------------------
+
+  @Query(() => VideoModel, { description: 'Get a video by ID' })
+  async video(@Args() data: FindUniqueVideoArgs) {
+    return await this.videosService.video(data);
+  }
+
+  @Query(() => PaginatedVideo, { description: 'Get all videos' })
+  async videos(@Args() query: FindManyVideoArgs) {
+    query = this.utilsService.findManyArgsValidation(query);
+
+    const videos = await this.videosService.videos(query);
+
+    const totalCount = await this.videosService.totalCount(query);
+
+    const edges = this.utilsService.generateEdges(videos);
+
+    const pageInfo = this.utilsService.generatePageInfo({
+      skip: query.skip,
+      take: query.take,
+      totalCount,
+      edges,
+    });
+
+    return { edges, pageInfo, totalCount, nodes: videos };
+  }
+
+  // ------------------------------
+  // ----- Mutations -----
+  // ------------------------------
 
   @UseGuards(MemberGuard)
   @Mutation(() => VideoModel)
@@ -59,7 +124,7 @@ export class VideosResolver {
     const result = this.videosService.storeVideo(file, video);
 
     if (!result) {
-      throw new Error('Internal Server Error');
+      throw new InternalServerErrorException('Error storing video');
     }
 
     return video;
@@ -69,75 +134,17 @@ export class VideosResolver {
   @Mutation(() => VideoModel)
   async updateVideo(
     @CurrentUser() currentUser: UserModel,
-    @Args() { where, data }: UpdateOneVideoArgs,
+    @Args() query: UpdateOneVideoArgs,
   ) {
-    const video = await this.videosService.updateVideo({
-      where,
-      data,
-      include: {
-        Owner: {
-          include: {
-            ownVideos: true,
-            invitedVideos: true,
-            _count: true,
-          },
-        },
-      },
-    });
+    return await this.videosService.updateVideo(query);
   }
 
   @UseGuards(MemberGuard)
   @Mutation(() => Boolean)
   async deleteVideo(
     @CurrentUser() currentUser: UserModel,
-    @Args() data: DeleteOneVideoArgs,
+    @Args() query: DeleteOneVideoArgs,
   ) {
-    return await this.videosService.deleteVideo(data);
-  }
-
-  @Query(() => VideoModel, { description: 'Get a video by ID' })
-  async video(@Args() data: FindUniqueVideoArgs) {
-    return await this.videosService.video(data);
-  }
-
-  @Query(() => PaginatedVideo, { description: 'Get all videos' })
-  async videos(@Args() query: FindManyVideoArgs) {
-    const videos = await this.videosService.videos(query);
-
-    const totalCount = await this.videosService.totalCount(query);
-
-    const edges = this.utilsService.generateEdges(videos);
-
-    const pageInfo = this.utilsService.generatePageInfo({
-      skip: query.skip,
-      take: query.take,
-      totalCount,
-      edges,
-    });
-
-    return { edges, pageInfo, totalCount, nodes: videos };
-  }
-
-  @ResolveField(() => UserModel, { name: 'Owner' }) async owner(
-    @Parent() video: Video,
-  ): Promise<UserModel> {
-    return await this.usersService.user({ where: { id: video.ownerId } });
-  }
-
-  @ResolveField(() => [UserModel], { name: 'Guests' })
-  async getGuests(
-    @Parent() video: Video,
-    @Args() { skip, take, cursor, where, orderBy }: FindManyUserArgs,
-  ) {
-    return await this.usersService.users({
-      skip,
-      take,
-      cursor,
-      where: {
-        ...where,
-        invitedVideos: { some: { id: { equals: video.id } } },
-      },
-      orderBy,
-    });
+    return await this.videosService.deleteVideo(query);
   }
 }

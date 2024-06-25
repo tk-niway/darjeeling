@@ -9,14 +9,11 @@ import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs';
 import { FileUpload } from 'graphql-upload-minimal';
 import { join } from 'path';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Video } from 'src/generated/video/video.model';
 import { IConfig } from 'src/config/config.interface';
 import { UtilsService } from 'src/utils/utils.service';
 import { rm } from 'fs/promises';
-import { DeleteOneVideoArgs } from 'src/generated/video/delete-one-video.args';
-import { FindUniqueVideoArgs } from 'src/generated/video/find-unique-video.args';
-import { FindManyVideoArgs } from 'src/generated/video/find-many-video.args';
 import { Prisma } from '@prisma/client';
+import { VideoModel } from 'src/videos/models/video.model';
 
 @Injectable()
 export class VideosService {
@@ -27,53 +24,63 @@ export class VideosService {
   ) {}
 
   private EXT_M3U8 = '.m3u8';
+
   private EXT_JPG = '.jpg';
 
   async totalCount(params: Prisma.VideoAggregateArgs): Promise<number> {
     const video = await this.prismaService.video.aggregate({
-      where: { ...params.where },
+      where: params.where,
       _count: true,
     });
     return video._count;
   }
 
-  async video(data: FindUniqueVideoArgs) {
+  async video(data: Prisma.VideoFindUniqueArgs) {
     return await this.prismaService.video.findUnique(data);
   }
 
-  async videos(query: FindManyVideoArgs) {
+  async videos(query: Prisma.VideoFindManyArgs) {
     return await this.prismaService.video.findMany(query);
   }
 
-  async createVideo(
-    data: Parameters<PrismaService['video']['create']>[0],
-  ): Promise<Video> {
+  async createVideo(data: Prisma.VideoCreateArgs): Promise<VideoModel> {
     return await this.prismaService.video.create(data);
   }
 
-  async updateVideo(
-    data: Parameters<PrismaService['video']['update']>[0],
-  ): Promise<Video> {
+  async updateVideo(data: Prisma.VideoUpdateArgs): Promise<VideoModel> {
     return await this.prismaService.video.update(data);
   }
 
-  async deleteVideo({ where }: DeleteOneVideoArgs): Promise<boolean> {
+  async deleteVideo(query: Prisma.VideoDeleteArgs): Promise<boolean> {
     try {
-      const video = await this.prismaService.video.findUnique({
-        where,
-      });
+      const video = await this.prismaService.video.findUnique(query);
 
       await this.deleteVideoDir(video);
 
       this.deleteThumbnail(video);
 
-      await this.prismaService.video.delete({ where });
+      await this.prismaService.video.delete(query);
 
       return true;
     } catch (error) {
       console.error(error);
       return false;
     }
+  }
+
+  async videosWithCount(
+    query: Prisma.VideoFindManyArgs,
+  ): Promise<{ videos: VideoModel[]; totalCount: number }> {
+    const videosPromise = this.videos(query);
+
+    const totalCountPromise = this.totalCount({ where: query.where });
+
+    const [videos, totalCount] = await Promise.all([
+      videosPromise,
+      totalCountPromise,
+    ]);
+
+    return { videos, totalCount };
   }
 
   async m3u8Url(videoId: string): Promise<string | null> {
@@ -96,7 +103,6 @@ export class VideosService {
       'video/quicktime',
     ];
 
-    // アップロードされたファイルのMIMEタイプが動画ファイルのリストに含まれているかチェック
     return videoMimeTypes.includes(fileUpload.mimetype);
   }
 
@@ -112,7 +118,7 @@ export class VideosService {
     return filePath;
   }
 
-  async storeVideo(file: FileUpload, video: Video): Promise<void> {
+  async storeVideo(file: FileUpload, video: VideoModel): Promise<void> {
     const videoDirPath = this.getVideoDirPath(video);
 
     if (!existsSync(videoDirPath)) mkdirSync(videoDirPath, { recursive: true });
@@ -158,7 +164,7 @@ export class VideosService {
     }
   }
 
-  private async deleteVideoDir(video: Video): Promise<void> {
+  private async deleteVideoDir(video: VideoModel): Promise<void> {
     const dirPath = this.getVideoDirPath(video);
 
     if (!existsSync(dirPath)) {
@@ -261,7 +267,7 @@ export class VideosService {
     });
   }
 
-  async createThumbnail(video: Video): Promise<string> {
+  async createThumbnail(video: VideoModel): Promise<string> {
     console.log('Creating thumbnail', video.id);
 
     const videoFilePath = join(this.getVideoDirPath(video), video.id + '0.ts');
@@ -320,7 +326,7 @@ export class VideosService {
     });
   }
 
-  private deleteThumbnail(video: Video): boolean {
+  private deleteThumbnail(video: VideoModel): boolean {
     const filePath = join(
       this.configService.get<string>('publicDirPath'),
       video.id + this.EXT_JPG,
@@ -335,7 +341,7 @@ export class VideosService {
     return true;
   }
 
-  private getVideoDirPath(video: Video): string {
+  private getVideoDirPath(video: VideoModel): string {
     return join(this.configService.get<string>('videosDirPath'), video.id);
   }
 }

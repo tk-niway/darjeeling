@@ -84,4 +84,21 @@ export class UtilsService {
       extension: filename.substring(dotIndex + 1),
     };
   }
+
+  findManyArgsValidation({
+    skip,
+    take,
+    cursor,
+    where,
+    orderBy,
+    distinct,
+  }: any) {
+    if (cursor === null) cursor = undefined;
+
+    if (orderBy === null) orderBy = undefined;
+
+    if (distinct === null) distinct = undefined;
+
+    return { skip, take, cursor, where, orderBy, distinct };
+  }
 }

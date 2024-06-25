@@ -39,4 +39,17 @@ export class UsersService {
     const deletedUser = await this.prismaService.user.delete(query);
     return deletedUser;
   }
+
+  async usersWithCount(
+    query: Prisma.UserFindManyArgs,
+  ): Promise<{ users: UserModel[]; totalCount: number }> {
+    const usersPromise = this.users(query);
+    const totalCountPromise = this.totalCount({ where: query.where });
+
+    const [users, totalCount] = await Promise.all([
+      usersPromise,
+      totalCountPromise,
+    ]);
+    return { users, totalCount };
+  }
 }

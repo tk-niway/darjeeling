@@ -43,10 +43,13 @@ export class UsersResolver {
     nullable: true,
     description: 'Videos where the user is the owner',
   })
-  async ownVideos(
-    @Parent() user: UserModel,
-    @Args() @Args() query: FindManyVideoArgs,
-  ) {
+  async ownVideos(@Parent() user: UserModel, @Args() query: FindManyVideoArgs) {
+    query = this.utilsService.findManyArgsValidation(query);
+
+    if (query.cursor === null) query.cursor = undefined;
+
+    if (query.orderBy === null) query.orderBy = undefined;
+
     return this.videosService.videos({
       ...query,
       where: { ownerId: { equals: user.id } },
@@ -60,8 +63,10 @@ export class UsersResolver {
   })
   async invitedVideos(
     @Parent() user: UserModel,
-    @Args() @Args() query: FindManyVideoArgs,
+    @Args() query: FindManyVideoArgs,
   ) {
+    query = this.utilsService.findManyArgsValidation(query);
+
     return this.videosService.videos({
       ...query,
       where: { guests: { some: { id: { equals: user.id } } } },
@@ -84,18 +89,18 @@ export class UsersResolver {
   }
 
   @Query((returns) => PaginatedUser)
-  async users(
-    @Args() { skip, take, cursor, where, orderBy }: FindManyUserArgs,
-  ): Promise<PaginatedUser> {
-    const users = await this.usersService.users({
+  async users(@Args() query: FindManyUserArgs): Promise<PaginatedUser> {
+    const { skip, take, cursor, where, orderBy, distinct } =
+      this.utilsService.findManyArgsValidation(query);
+
+    const { users, totalCount } = await this.usersService.usersWithCount({
       skip,
       take,
       cursor,
       where: { ...where, isActive: true },
       orderBy,
+      distinct,
     });
-
-    const totalCount = await this.usersService.totalCount({ where });
 
     const edges = this.utilsService.generateEdges(users);
 
@@ -115,7 +120,7 @@ export class UsersResolver {
 
   @UseGuards(MemberGuard)
   @Mutation((returns) => UserModel)
-  async createUser(@Args("data") query: UserCreateInput): Promise<UserModel> {
+  async createUser(@Args('data') query: UserCreateInput): Promise<UserModel> {
     return this.usersService.createUser(query);
   }
 

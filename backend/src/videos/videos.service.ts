@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as ffmpeg from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
 import { createWriteStream, existsSync, mkdirSync, unlinkSync } from 'fs';
 import { FileUpload } from 'graphql-upload-minimal';
 import { join } from 'path';

@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as jwkToPem from 'jwk-to-pem';
-import * as jwt from 'jsonwebtoken';
+import jwkToPem from 'jwk-to-pem';
+import jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { UsersService } from 'src/users/users.service';
 import { UserWithError } from 'src/users/models/userWithError.model';

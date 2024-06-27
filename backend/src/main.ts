@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import fastifyStatic from '@fastify/static';
 import { AppModule } from 'src/app.module';
 import { IConfig } from 'src/config/config.interface';
+import { PrismaExceptionFilter } from 'src/common/exceptions/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,16 +17,19 @@ async function bootstrap() {
   );
 
   const configService: ConfigService<IConfig, true> = app.get(ConfigService);
+
   const port = configService.get<number>('port');
-  // NOTE - Uncomment this line to enable the global filter
-  // app.useGlobalFilters(new AllExceptionsFilter());
+
+  app.useGlobalFilters(new PrismaExceptionFilter());
 
   app.enableCors({
     origin: configService.get<string>('frontendUrl'),
     methods: '*',
     allowedHeaders: '*',
   });
+
   app.register(mercuriusUpload);
+
   app.register(fastifyStatic, {
     root: configService.get('publicDirPath'),
     prefix: configService.get('publicDirPrefix'),

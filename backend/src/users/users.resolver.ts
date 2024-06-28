@@ -25,6 +25,7 @@ import { VideosService } from 'src/videos/videos.service';
 import { FindManyVideoArgs } from 'src/generated/video/find-many-video.args';
 import { MemberGuard } from 'src/common/guards/member.guard';
 import { UserCreateInput } from 'src/generated/user/user-create.input';
+import { OwnVideosDataLoader } from 'src/users/dataloaders/ownVideos.dataloader';
 
 @Resolver(() => UserModel)
 export class UsersResolver {
@@ -32,6 +33,7 @@ export class UsersResolver {
     private readonly usersService: UsersService,
     private readonly utilsService: UtilsService,
     private readonly videosService: VideosService,
+    private readonly ownVideosDataLoader: OwnVideosDataLoader,
   ) {}
 
   // ------------------------------
@@ -43,17 +45,13 @@ export class UsersResolver {
     nullable: true,
     description: 'Videos where the user is the owner',
   })
-  async ownVideos(@Parent() user: UserModel, @Args() query: FindManyVideoArgs) {
+  async ownVideos(
+    @Parent() user: UserModel,
+    @Args() query: FindManyVideoArgs,
+  ): Promise<VideoModel[]> {
     query = this.utilsService.findManyArgsValidation(query);
 
-    if (query.cursor === null) query.cursor = undefined;
-
-    if (query.orderBy === null) query.orderBy = undefined;
-
-    return this.videosService.videos({
-      ...query,
-      where: { ownerId: { equals: user.id } },
-    });
+    return await this.ownVideosDataLoader.load({ query, user });
   }
 
   @ResolveField(() => [VideoModel], {

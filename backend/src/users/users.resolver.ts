@@ -1,3 +1,4 @@
+import { InvitedVideosDataLoader } from './dataloaders/invitedVideos.dataloader';
 import {
   Mutation,
   Query,
@@ -21,7 +22,6 @@ import { PaginatedUser } from 'src/users/models/paginatedUser.model';
 import { UtilsService } from 'src/utils/utils.service';
 import { UserModel } from 'src/users/models/user.model';
 import { VideoModel } from 'src/videos/models/video.model';
-import { VideosService } from 'src/videos/videos.service';
 import { FindManyVideoArgs } from 'src/generated/video/find-many-video.args';
 import { MemberGuard } from 'src/common/guards/member.guard';
 import { UserCreateInput } from 'src/generated/user/user-create.input';
@@ -32,8 +32,8 @@ export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly utilsService: UtilsService,
-    private readonly videosService: VideosService,
     private readonly ownVideosDataLoader: OwnVideosDataLoader,
+    private readonly invitedVideosDataLoader: InvitedVideosDataLoader,
   ) {}
 
   // ------------------------------
@@ -62,13 +62,10 @@ export class UsersResolver {
   async invitedVideos(
     @Parent() user: UserModel,
     @Args() query: FindManyVideoArgs,
-  ) {
+  ): Promise<VideoModel[]> {
     query = this.utilsService.findManyArgsValidation(query);
 
-    return this.videosService.videos({
-      ...query,
-      where: { guests: { some: { id: { equals: user.id } } } },
-    });
+    return await this.invitedVideosDataLoader.load({ query, user });
   }
 
   // ------------------------------

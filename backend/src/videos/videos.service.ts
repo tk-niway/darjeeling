@@ -43,11 +43,11 @@ export class VideosService {
     return await this.prismaService.video.findMany(query);
   }
 
-  async createVideo(data: Prisma.VideoCreateArgs): Promise<VideoModel> {
+  async createVideo(data: Prisma.VideoCreateArgs) {
     return await this.prismaService.video.create(data);
   }
 
-  async updateVideo(data: Prisma.VideoUpdateArgs): Promise<VideoModel> {
+  async updateVideo(data: Prisma.VideoUpdateArgs) {
     return await this.prismaService.video.update(data);
   }
 
@@ -68,9 +68,7 @@ export class VideosService {
     }
   }
 
-  async videosWithCount(
-    query: Prisma.VideoFindManyArgs,
-  ): Promise<{ videos: VideoModel[]; totalCount: number }> {
+  async videosWithCount(query: Prisma.VideoFindManyArgs) {
     const videosPromise = this.videos(query);
 
     const totalCountPromise = this.totalCount({ where: query.where });

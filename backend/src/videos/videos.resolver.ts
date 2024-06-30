@@ -1,3 +1,4 @@
+import { GuestsDataLoader } from './dataloaders/guests.dataloader';
 import {
   Args,
   Mutation,
@@ -16,7 +17,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UtilsService } from 'src/utils/utils.service';
-import { Video } from 'src/generated/video/video.model';
 import { UpdateOneVideoArgs } from 'src/generated/video/update-one-video.args';
 import { DeleteOneVideoArgs } from 'src/generated/video/delete-one-video.args';
 import { FindUniqueVideoArgs } from 'src/generated/video/find-unique-video.args';
@@ -24,15 +24,16 @@ import { VideoModel } from 'src/videos/models/video.model';
 import { FindManyUserArgs } from 'src/generated/user/find-many-user.args';
 import { PaginatedVideo } from 'src/videos/models/paginatedVideo.model';
 import { FindManyVideoArgs } from 'src/generated/video/find-many-video.args';
-import { UsersService } from 'src/users/users.service';
 import { UserModel } from 'src/users/models/user.model';
+import { OwnerDataLoader } from 'src/videos/dataloaders/owner.dataloader';
 
 @Resolver(() => VideoModel)
 export class VideosResolver {
   constructor(
-    private videosService: VideosService,
-    private utilsService: UtilsService,
-    private usersService: UsersService,
+    private readonly videosService: VideosService,
+    private readonly utilsService: UtilsService,
+    private readonly guestsDataLoader: GuestsDataLoader,
+    private readonly ownerDataLoader: OwnerDataLoader,
   ) {}
 
   // ------------------------------
@@ -40,27 +41,16 @@ export class VideosResolver {
   // ------------------------------
 
   @ResolveField(() => UserModel, { name: 'Owner' }) async owner(
-    @Parent() video: Video,
-  ): Promise<UserModel> {
-    return await this.usersService.user({ where: { id: video.ownerId } });
+    @Parent() video: VideoModel,
+  ) {
+    return await this.ownerDataLoader.load(video);
   }
 
   @ResolveField(() => [UserModel], { name: 'Guests' })
-  async getGuests(@Parent() video: Video, @Args() query: FindManyUserArgs) {
-    const { skip, take, cursor, where, orderBy, distinct } =
-      this.utilsService.findManyArgsValidation(query);
+  async guests(@Parent() video: VideoModel, @Args() query: FindManyUserArgs) {
+    query = this.utilsService.findManyArgsValidation(query);
 
-    return await this.usersService.users({
-      skip,
-      take,
-      cursor,
-      where: {
-        ...where,
-        invitedVideos: { some: { id: { equals: video.id } } },
-      },
-      orderBy,
-      distinct,
-    });
+    return await this.guestsDataLoader.load({ query, video });
   }
 
   // ------------------------------
@@ -110,7 +100,7 @@ export class VideosResolver {
 
     const { name } = this.utilsService.splitFilename(file.filename);
 
-    const video: Video = await this.videosService.createVideo({
+    const video: VideoModel = await this.videosService.createVideo({
       data: {
         title: name,
         Owner: {

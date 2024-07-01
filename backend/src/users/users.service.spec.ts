@@ -4,6 +4,9 @@ import { UsersResolver } from 'src/users/users.resolver';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from 'src/generated/user/user.model';
 import { Prisma } from '@prisma/client';
+import { ConfigModule } from '@nestjs/config';
+import { config } from 'src/config/main.config';
+import { validationSchema } from 'src/config/config.validation';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -25,6 +28,14 @@ describe('UsersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+          validationSchema,
+          load: [config],
+        }),
+      ],
       providers: [UsersService, UsersResolver, PrismaService],
     }).compile();
 
@@ -50,7 +61,7 @@ describe('UsersService', () => {
 
       jest.spyOn(service, 'user').mockResolvedValue(mockUsers[0]);
 
-      const user = await service.user(userWhereUniqueInput);
+      const user = await service.user({ where: userWhereUniqueInput });
       expect(user).toBeDefined();
       expect(user).toBe(mockUsers[0]);
     });
@@ -115,7 +126,9 @@ describe('UsersService', () => {
     it('should delete an existing user', async () => {
       const userWhereUniqueInput: Prisma.UserWhereUniqueInput = { id: '1' }; // Provide valid unique input
       jest.spyOn(service, 'deleteUser').mockResolvedValue(mockUsers[0]);
-      const deletedUser = await service.deleteUser(userWhereUniqueInput);
+      const deletedUser = await service.deleteUser({
+        where: userWhereUniqueInput,
+      });
       expect(deletedUser).toBeDefined();
       expect(deletedUser).toBe(mockUsers[0]);
     });

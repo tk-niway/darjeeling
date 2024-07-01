@@ -2,27 +2,48 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersResolver } from 'src/users/users.resolver';
 import { UsersService } from 'src/users/users.service';
 import {
-  ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { User } from 'src/generated/user/user.model';
 import { UpdateOneUserArgs } from 'src/generated/user/update-one-user.args';
+import { ConfigModule } from '@nestjs/config';
+import { config } from 'src/config/main.config';
+import { validationSchema } from 'src/config/config.validation';
+import { UtilsService } from 'src/utils/utils.service';
+import { InvitedVideosDataLoader } from 'src/users/dataloaders/invitedVideos.dataloader';
+import { OwnVideosDataLoader } from 'src/users/dataloaders/ownVideos.dataloader';
+import { VideosService } from 'src/videos/videos.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 describe('UsersResolver', () => {
   let usersResolver: UsersResolver;
   let usersService: UsersService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+          validationSchema,
+          load: [config],
+        }),
+        PrismaModule,
+      ],
       providers: [
         UsersResolver,
+        UtilsService,
+        InvitedVideosDataLoader,
+        OwnVideosDataLoader,
+        VideosService,
         {
           provide: UsersService,
           useValue: {
             totalCount: jest.fn(),
             user: jest.fn(),
             users: jest.fn(),
+            usersWithCount: jest.fn(),
             createUser: jest.fn(),
             updateUser: jest.fn(),
             deleteUser: jest.fn(),
@@ -31,7 +52,7 @@ describe('UsersResolver', () => {
       ],
     }).compile();
 
-    usersResolver = moduleRef.get<UsersResolver>(UsersResolver);
+    usersResolver = await moduleRef.resolve<UsersResolver>(UsersResolver);
     usersService = moduleRef.get<UsersService>(UsersService);
   });
 
@@ -52,6 +73,7 @@ describe('UsersResolver', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
+
       jest.spyOn(usersService, 'user').mockResolvedValue(user);
 
       expect(await usersResolver.user({ where })).toEqual(user);
@@ -66,12 +88,15 @@ describe('UsersResolver', () => {
       );
     });
 
-    it('should throw InternalServerErrorException if an error occurs', async () => {
+    it('should throw NotFoundException if an error occurs', async () => {
       const where = { id: '1' };
-      jest.spyOn(usersService, 'user').mockRejectedValue(new Error());
+
+      jest
+        .spyOn(usersService, 'user')
+        .mockRejectedValue(new NotFoundException('User not found'));
 
       await expect(usersResolver.user({ where })).rejects.toThrow(
-        InternalServerErrorException,
+        NotFoundException,
       );
     });
   });
@@ -104,8 +129,11 @@ describe('UsersResolver', () => {
           updatedAt: new Date(),
         },
       ];
-      jest.spyOn(usersService, 'users').mockResolvedValue(users);
-      jest.spyOn(usersService, 'totalCount').mockResolvedValue(users.length);
+
+      jest.spyOn(usersService, 'usersWithCount').mockResolvedValue({
+        users,
+        totalCount: users.length,
+      });
 
       const expected = {
         edges: users.map((user) => ({ cursor: user.id, node: user })),
@@ -172,8 +200,10 @@ describe('UsersResolver', () => {
 
       const slicedUsers = users.slice(skip, skip + take);
 
-      jest.spyOn(usersService, 'users').mockResolvedValue(slicedUsers);
-      jest.spyOn(usersService, 'totalCount').mockResolvedValue(users.length);
+      jest.spyOn(usersService, 'usersWithCount').mockResolvedValue({
+        users: slicedUsers,
+        totalCount: users.length,
+      });
 
       const result = await usersResolver.users({
         skip,
@@ -202,7 +232,9 @@ describe('UsersResolver', () => {
       const cursor = null;
       const where = {};
       const orderBy = null;
-      jest.spyOn(usersService, 'users').mockRejectedValue(new Error());
+
+      jest.spyOn(usersService, 'usersWithCount').mockRejectedValue(new Error());
+
       await expect(
         usersResolver.users({ skip, take, cursor, where, orderBy }),
       ).rejects.toThrow(Error);
@@ -227,7 +259,7 @@ describe('UsersResolver', () => {
         auth0Id: 'auth0|1234567890',
       };
       jest.spyOn(usersService, 'createUser').mockResolvedValue(createdUser);
-      expect(await usersResolver.createUser({ data })).toEqual(createdUser);
+      expect(await usersResolver.createUser(data)).toEqual(createdUser);
     });
 
     it('should throw InternalServerErrorException if an error occurs', async () => {
@@ -237,10 +269,12 @@ describe('UsersResolver', () => {
         password: 'password123',
         auth0Id: 'auth0|1234567890',
       };
+
       jest
         .spyOn(usersService, 'createUser')
         .mockRejectedValue(new InternalServerErrorException());
-      await expect(usersResolver.createUser({ data })).rejects.toThrow(
+
+      await expect(usersResolver.createUser(data)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -273,10 +307,10 @@ describe('UsersResolver', () => {
         updatedAt: new Date(),
         auth0Id: '',
       };
+
       jest.spyOn(usersService, 'updateUser').mockResolvedValue(updatedUser);
-      expect(await usersResolver.updateUser(currentUser, data)).toEqual(
-        updatedUser,
-      );
+
+      expect(await usersResolver.updateUser(data)).toEqual(updatedUser);
     });
 
     it('should throw InternalServerErrorException if an error occurs', async () => {
@@ -296,64 +330,21 @@ describe('UsersResolver', () => {
         },
         where: { id: '1' },
       };
+
       jest
         .spyOn(usersService, 'updateUser')
         .mockRejectedValue(new InternalServerErrorException());
 
-      await expect(usersResolver.updateUser(currentUser, data)).rejects.toThrow(
+      await expect(usersResolver.updateUser(data)).rejects.toThrow(
         InternalServerErrorException,
-      );
-    });
-
-    it('should update another user', async () => {
-      const currentUser: User = {
-        id: '1',
-        name: 'Test User',
-        auth0Id: '',
-        email: '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const data: UpdateOneUserArgs = {
-        data: {
-          name: { set: 'Updated User' },
-          email: { set: 'updated@example.com' },
-        },
-        where: { id: '2' },
-      };
-
-      const updatedUser: User = {
-        id: '2',
-        name: 'Updated User',
-        email: 'updated@example.com',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        auth0Id: '',
-      };
-
-      jest.spyOn(usersService, 'updateUser').mockResolvedValue(updatedUser);
-
-      await expect(usersResolver.updateUser(currentUser, data)).rejects.toThrow(
-        ForbiddenException,
       );
     });
   });
 
   describe('deleteUser', () => {
     it('should delete a user', async () => {
-      const currentUser: User = {
-        id: '1',
-        name: 'Test User',
-        auth0Id: '',
-        email: '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
       const where = { id: '1' };
+
       const deletedUser: User = {
         id: '1',
         name: 'Test User',
@@ -363,59 +354,22 @@ describe('UsersResolver', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
+
       jest.spyOn(usersService, 'deleteUser').mockResolvedValue(deletedUser);
-      expect(await usersResolver.deleteUser(currentUser, { where })).toEqual(
-        deletedUser,
-      );
+
+      expect(await usersResolver.deleteUser({ where })).toEqual(deletedUser);
     });
 
     it('should throw InternalServerErrorException if an error occurs', async () => {
-      const currentUser: User = {
-        id: '1',
-        name: 'Test User',
-        auth0Id: '',
-        email: '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
       const where = { id: '1' };
+
       jest
         .spyOn(usersService, 'deleteUser')
         .mockRejectedValue(new InternalServerErrorException());
-      await expect(
-        usersResolver.deleteUser(currentUser, { where }),
-      ).rejects.toThrow(InternalServerErrorException);
-    });
 
-    it('should delete another user', async () => {
-      const currentUser: User = {
-        id: '1',
-        name: 'Test User',
-        auth0Id: '',
-        email: '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const where = { id: '2' };
-
-      const deletedUser: User = {
-        id: '2',
-        name: 'Test User',
-        auth0Id: '',
-        email: '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      jest.spyOn(usersService, 'deleteUser').mockResolvedValue(deletedUser);
-
-      await expect(
-        usersResolver.deleteUser(currentUser, { where }),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(usersResolver.deleteUser({ where })).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

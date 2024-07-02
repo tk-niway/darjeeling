@@ -3,6 +3,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/generated/user/user.model';
+import { ConfigModule } from '@nestjs/config';
+import { config } from 'src/config/main.config';
+import { validationSchema } from 'src/config/config.validation';
 
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
@@ -10,6 +13,14 @@ describe('JwtStrategy', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+          validationSchema,
+          load: [config],
+        }),
+      ],
       providers: [
         JwtStrategy,
         {

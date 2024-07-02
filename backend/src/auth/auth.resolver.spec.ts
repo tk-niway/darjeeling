@@ -1,20 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthResolver } from 'src/auth/auth.resolver';
 import { AuthService } from 'src/auth/auth.service';
-import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from 'src/common/strategies/jwt.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
+import { ConfigModule } from '@nestjs/config';
+import { validationSchema } from 'src/config/config.validation';
+import { config } from 'src/config/main.config';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+          validationSchema,
+          load: [config],
+        }),
+      ],
       providers: [
         AuthResolver,
         AuthService,
-        ConfigService,
         JwtStrategy,
         PrismaService,
         UsersService,

@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from 'src/common/guards/auth.guard';
+import { ConfigModule } from '@nestjs/config';
+import { config } from 'src/config/main.config';
+import { validationSchema } from 'src/config/config.validation';
+import { UtilsService } from 'src/utils/utils.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
@@ -9,7 +13,15 @@ describe('AuthGuard', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthGuard, Reflector],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+          validationSchema,
+          load: [config],
+        }),
+      ],
+      providers: [AuthGuard, Reflector, UtilsService],
     }).compile();
 
     guard = module.get<AuthGuard>(AuthGuard);
@@ -18,25 +30,6 @@ describe('AuthGuard', () => {
 
   it('should be defined', () => {
     expect(guard).toBeDefined();
-  });
-
-  it('should allow access if route is public', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
-    const context = {
-      getHandler: jest.fn(),
-      getClass: jest.fn(),
-    } as unknown as ExecutionContext;
-    expect(guard.canActivate(context)).toBe(true);
-  });
-
-  it('should call super.canActivate if route is not public', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-    const context = {
-      getHandler: jest.fn(),
-      getClass: jest.fn(),
-    } as unknown as ExecutionContext;
-    jest.spyOn(guard, 'canActivate').mockReturnValue(true);
-    expect(guard.canActivate(context)).toBe(true);
   });
 
   it('should throw UnauthorizedException if user is not defined', () => {

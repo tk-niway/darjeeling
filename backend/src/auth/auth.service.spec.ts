@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConfigModule } from '@nestjs/config';
+import { config } from 'src/config/main.config';
+import { validationSchema } from 'src/config/config.validation';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -10,7 +12,15 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, UsersService, ConfigService, PrismaService],
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true,
+          validationSchema,
+          load: [config],
+        }),
+      ],
+      providers: [AuthService, UsersService, PrismaService],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);

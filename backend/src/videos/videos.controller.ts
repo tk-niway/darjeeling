@@ -17,7 +17,7 @@ import { User } from 'src/generated/user/user.model';
 export class VideosController {
   constructor(private videosService: VideosService) {}
 
-  @UseGuards(RefererGuard)
+  // @UseGuards(RefererGuard)
   @Get(':videoId')
   async m3u8(
     @Param('videoId') videoId: string,
@@ -26,8 +26,7 @@ export class VideosController {
   ) {
     const url = await this.videosService.m3u8Url(videoId);
 
-    console.log({ url });
-    if (url === null) return new NotFoundException('Video not found');
+    if (url === null) throw new NotFoundException('Video not found');
 
     return res.send(url);
   }
@@ -42,7 +41,7 @@ export class VideosController {
   ) {
     const filePath = await this.videosService.videoFile(videoId, filename);
 
-    if (filePath === null) return new NotFoundException('Video not found');
+    if (filePath === null) throw new NotFoundException('Video not found');
 
     const stream = createReadStream(filePath);
 

@@ -40,13 +40,18 @@ export class VideosResolver {
   // ----- Resolver Fields -----
   // ------------------------------
 
-  @ResolveField(() => UserModel, { name: 'Owner' }) async owner(
-    @Parent() video: VideoModel,
-  ) {
+  @ResolveField(() => UserModel, {
+    name: 'Owner',
+    description: 'Owner of the video',
+  })
+  async owner(@Parent() video: VideoModel) {
     return await this.ownerDataLoader.load(video);
   }
 
-  @ResolveField(() => [UserModel], { name: 'Guests' })
+  @ResolveField(() => [UserModel], {
+    name: 'Guests',
+    description: 'Guests of the video',
+  })
   async guests(@Parent() video: VideoModel, @Args() query: FindManyUserArgs) {
     query = this.utilsService.findManyArgsValidation(query);
 
@@ -87,7 +92,7 @@ export class VideosResolver {
   // ------------------------------
 
   @UseGuards(MemberGuard)
-  @Mutation(() => VideoModel)
+  @Mutation(() => VideoModel, { description: 'Upload a video' })
   async uploadVideo(
     @CurrentUser() currentUser: UserModel,
     @Args({ name: 'file', type: () => GraphQLUpload }) file: FileUpload,
@@ -121,20 +126,14 @@ export class VideosResolver {
   }
 
   @UseGuards(MemberGuard)
-  @Mutation(() => VideoModel)
-  async updateVideo(
-    @CurrentUser() currentUser: UserModel,
-    @Args() query: UpdateOneVideoArgs,
-  ) {
+  @Mutation(() => VideoModel, { description: 'Update a video' })
+  async updateVideo(@Args() query: UpdateOneVideoArgs) {
     return await this.videosService.updateVideo(query);
   }
 
   @UseGuards(MemberGuard)
-  @Mutation(() => Boolean)
-  async deleteVideo(
-    @CurrentUser() currentUser: UserModel,
-    @Args() query: DeleteOneVideoArgs,
-  ) {
+  @Mutation(() => Boolean, { description: 'Delete a video' })
+  async deleteVideo(@Args() query: DeleteOneVideoArgs) {
     return await this.videosService.deleteVideo(query);
   }
 }

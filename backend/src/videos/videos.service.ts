@@ -82,12 +82,16 @@ export class VideosService {
   }
 
   async m3u8Url(videoId: string): Promise<string | null> {
-    const video = await this.prismaService.video.findUnique({
-      where: { id: videoId },
-      select: { url: true },
-    });
-
-    return video.url;
+    try {
+      const video = await this.prismaService.video.findUnique({
+        where: { id: videoId },
+        select: { url: true },
+      });
+      return video.url;
+    } catch (error) {
+      console.error('video.service.m3u8Url', { videoId }, error);
+      return null;
+    }
   }
 
   isVideoFile(fileUpload: FileUpload): boolean {

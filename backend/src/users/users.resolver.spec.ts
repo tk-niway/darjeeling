@@ -15,6 +15,7 @@ import { InvitedVideosDataLoader } from 'src/users/dataloaders/invitedVideos.dat
 import { OwnVideosDataLoader } from 'src/users/dataloaders/ownVideos.dataloader';
 import { VideosService } from 'src/videos/videos.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { VideoModel } from 'src/videos/models/video.model';
 
 describe('UsersResolver', () => {
   let usersResolver: UsersResolver;
@@ -370,6 +371,150 @@ describe('UsersResolver', () => {
       await expect(usersResolver.deleteUser({ where })).rejects.toThrow(
         InternalServerErrorException,
       );
+    });
+  });
+
+  describe('invitedVideos', () => {
+    const invitedVideos: VideoModel[] = [
+      {
+        id: '1',
+        title: 'Video 1',
+        url: 'http://example.com/video1.m3u8',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Video 1の説明', // VideoModelに必要な追加のプロパティ
+        thumbnailUrl: 'http://example.com/thumbnail1.jpg',
+        duration: 120,
+        visibility: 'public',
+        uploadStatus: 'pending',
+        ownerId: '',
+        playCount: 0,
+        isActive: false,
+      },
+      {
+        id: '2',
+        title: 'Video 2',
+        url: 'http://example.com/video2.m3u8',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Video 2の説明',
+        thumbnailUrl: 'http://example.com/thumbnail2.jpg',
+        duration: 150,
+        visibility: 'public',
+        uploadStatus: 'pending',
+        ownerId: '',
+        playCount: 0,
+        isActive: false,
+      },
+    ];
+
+    const query = {
+      skip: 0,
+      take: 10,
+      cursor: null,
+      where: {},
+      orderBy: null,
+    };
+
+    const user: User = {
+      id: '1',
+      name: 'Test User',
+      auth0Id: '',
+      email: '',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should return an array of videos', async () => {
+      jest
+        .spyOn(usersResolver, 'invitedVideos')
+        .mockResolvedValue(invitedVideos);
+
+      expect(await usersResolver.invitedVideos(user, query)).toEqual(
+        invitedVideos,
+      );
+    });
+
+    it('should return an empty array if no videos are found', async () => {
+      const user: User = {
+        id: '1',
+        name: 'Test User',
+        auth0Id: '',
+        email: '',
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest.spyOn(usersResolver, 'invitedVideos').mockResolvedValue([]);
+
+      expect(await usersResolver.invitedVideos(user, query)).toEqual([]);
+    });
+  });
+
+  describe('ownVideos', () => {
+    const ownVideos: VideoModel[] = [
+      {
+        id: '1',
+        title: 'Video 1',
+        url: 'http://example.com/video1.m3u8',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Video 1の説明',
+        thumbnailUrl: 'http://example.com/thumbnail1.jpg',
+        duration: 120,
+        visibility: 'public',
+        uploadStatus: 'pending',
+        ownerId: '',
+        playCount: 0,
+        isActive: false,
+      },
+      {
+        id: '2',
+        title: 'Video 2',
+        url: 'http://example.com/video2.m3u8',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: 'Video 2の説明',
+        thumbnailUrl: 'http://example.com/thumbnail2.jpg',
+        duration: 150,
+        visibility: 'public',
+        uploadStatus: 'pending',
+        ownerId: '',
+        playCount: 0,
+        isActive: false,
+      },
+    ];
+
+    const query = {
+      skip: 0,
+      take: 10,
+      cursor: null,
+      where: {},
+      orderBy: null,
+    };
+
+    const user: User = {
+      id: '1',
+      name: 'Test User',
+      auth0Id: '',
+      email: '',
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should return an array of videos', async () => {
+      jest.spyOn(usersResolver, 'ownVideos').mockResolvedValue(ownVideos);
+
+      expect(await usersResolver.ownVideos(user, query)).toEqual(ownVideos);
+    });
+
+    it('should return an empty array if no videos are found', async () => {
+      jest.spyOn(usersResolver, 'ownVideos').mockResolvedValue([]);
+
+      expect(await usersResolver.ownVideos(user, query)).toEqual([]);
     });
   });
 });

@@ -51,21 +51,28 @@ export class VideosService {
     return await this.prismaService.video.update(data);
   }
 
-  async deleteVideo(query: Prisma.VideoDeleteArgs): Promise<boolean> {
-    try {
-      const video = await this.prismaService.video.findUnique(query);
+  async deleteVideo(query: Prisma.VideoDeleteArgs): Promise<VideoModel> {
+    const video = await this.prismaService.video.findUnique(query);
 
-      await this.deleteVideoDir(video);
+    if (!video) return video;
 
-      this.deleteThumbnail(video);
+    await this.deleteVideoDir(video).catch((error) => {
+      throw new InternalServerErrorException(
+        `Error deleting video directory: ${error.message}`,
+      );
+    });
 
-      await this.prismaService.video.delete(query);
+    await this.deleteThumbnail(video).catch((error) => {
+      throw new InternalServerErrorException(
+        `Error deleting thumbnail: ${error.message}`,
+      );
+    });
 
-      return true;
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
+    const deletedVideo = await this.prismaService.video.delete({
+      where: { id: video.id },
+    });
+
+    return deletedVideo;
   }
 
   async videosWithCount(query: Prisma.VideoFindManyArgs) {
@@ -81,17 +88,15 @@ export class VideosService {
     return { videos, totalCount };
   }
 
-  async m3u8Url(videoId: string): Promise<string | null> {
-    try {
-      const video = await this.prismaService.video.findUnique({
-        where: { id: videoId },
-        select: { url: true },
-      });
-      return video.url;
-    } catch (error) {
-      console.error('video.service.m3u8Url', { videoId }, error);
-      return null;
-    }
+  async m3u8Url(videoId: string): Promise<string | undefined> {
+    const video = await this.prismaService.video.findUnique({
+      where: { id: videoId },
+      select: { url: true },
+    });
+
+    if (!video) return undefined;
+
+    return video.url;
   }
 
   isVideoFile(fileUpload: FileUpload): boolean {
@@ -166,20 +171,18 @@ export class VideosService {
     }
   }
 
-  private async deleteVideoDir(video: VideoModel): Promise<void> {
+  private async deleteVideoDir(video: VideoModel): Promise<boolean> {
     const dirPath = this.getVideoDirPath(video);
 
     if (!existsSync(dirPath)) {
       throw new NotFoundException('Video not found');
     }
 
-    try {
-      await rm(dirPath, { recursive: true });
+    await rm(dirPath, { recursive: true });
 
-      console.log(`${dirPath} has been removed successfully.`);
-    } catch (error) {
-      throw new InternalServerErrorException('Error removing video directory');
-    }
+    console.log(`${dirPath} has been removed successfully.`);
+
+    return true;
   }
 
   private async upload(file: FileUpload, filepath: string): Promise<string> {
@@ -328,7 +331,7 @@ export class VideosService {
     });
   }
 
-  private deleteThumbnail(video: VideoModel): boolean {
+  private async deleteThumbnail(video: VideoModel): Promise<boolean> {
     const filePath = join(
       this.configService.get<string>('publicDirPath'),
       video.id + this.EXT_JPG,

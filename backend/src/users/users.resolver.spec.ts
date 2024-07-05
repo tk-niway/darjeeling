@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersResolver } from 'src/users/users.resolver';
 import { UsersService } from 'src/users/users.service';
 import {
+  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -20,6 +21,8 @@ import { VideoModel } from 'src/videos/models/video.model';
 describe('UsersResolver', () => {
   let usersResolver: UsersResolver;
   let usersService: UsersService;
+  let ownVideosDataLoader: OwnVideosDataLoader;
+  let invitedVideosDataLoader: InvitedVideosDataLoader;
 
   beforeAll(async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
@@ -36,25 +39,34 @@ describe('UsersResolver', () => {
         UsersResolver,
         UtilsService,
         InvitedVideosDataLoader,
-        OwnVideosDataLoader,
         VideosService,
+        UsersService,
         {
-          provide: UsersService,
+          provide: OwnVideosDataLoader,
           useValue: {
-            totalCount: jest.fn(),
-            user: jest.fn(),
-            users: jest.fn(),
-            usersWithCount: jest.fn(),
-            createUser: jest.fn(),
-            updateUser: jest.fn(),
-            deleteUser: jest.fn(),
+            load: jest.fn(),
+          },
+        },
+        {
+          provide: InvitedVideosDataLoader,
+          useValue: {
+            load: jest.fn(),
           },
         },
       ],
     }).compile();
 
     usersResolver = await moduleRef.resolve<UsersResolver>(UsersResolver);
+
     usersService = moduleRef.get<UsersService>(UsersService);
+
+    ownVideosDataLoader = await moduleRef.resolve<OwnVideosDataLoader>(
+      OwnVideosDataLoader,
+    );
+
+    invitedVideosDataLoader = await moduleRef.resolve<InvitedVideosDataLoader>(
+      InvitedVideosDataLoader,
+    );
   });
 
   it('should be defined', () => {
@@ -80,7 +92,7 @@ describe('UsersResolver', () => {
       expect(await usersResolver.user({ where })).toEqual(user);
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should throw NotFoundException if user is null', async () => {
       const where = { id: '1' }; // Change the value of id to a string
       jest.spyOn(usersService, 'user').mockResolvedValue(null);
 
@@ -89,15 +101,24 @@ describe('UsersResolver', () => {
       );
     });
 
-    it('should throw NotFoundException if an error occurs', async () => {
+    it('should throw NotFoundException if user is undefined', async () => {
+      const where = { id: '1' }; // Change the value of id to a string
+      jest.spyOn(usersService, 'user').mockResolvedValue(undefined);
+
+      await expect(usersResolver.user({ where })).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw InternalServerErrorException if an error occurs', async () => {
       const where = { id: '1' };
 
       jest
         .spyOn(usersService, 'user')
-        .mockRejectedValue(new NotFoundException('User not found'));
+        .mockRejectedValue(new InternalServerErrorException());
 
       await expect(usersResolver.user({ where })).rejects.toThrow(
-        NotFoundException,
+        InternalServerErrorException,
       );
     });
   });
@@ -227,6 +248,39 @@ describe('UsersResolver', () => {
       });
     });
 
+    it('should return user = [], totalCount = 0, hasNextPage = false, hasPreviousPage = false', async () => {
+      const skip = 0;
+      const take = 10;
+      const cursor = null;
+      const where = {};
+      const orderBy = null;
+
+      jest.spyOn(usersService, 'usersWithCount').mockResolvedValue({
+        users: [],
+        totalCount: 0,
+      });
+
+      const result = await usersResolver.users({
+        skip,
+        take,
+        cursor,
+        where,
+        orderBy,
+      });
+
+      expect(result).toEqual({
+        edges: [],
+        nodes: [],
+        pageInfo: {
+          startCursor: '',
+          endCursor: '',
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+        totalCount: 0,
+      });
+    });
+
     it('should throw InternalServerErrorException if an error occurs', async () => {
       const skip = 0;
       const take = 10;
@@ -234,11 +288,13 @@ describe('UsersResolver', () => {
       const where = {};
       const orderBy = null;
 
-      jest.spyOn(usersService, 'usersWithCount').mockRejectedValue(new Error());
+      jest
+        .spyOn(usersService, 'usersWithCount')
+        .mockRejectedValue(new InternalServerErrorException());
 
       await expect(
         usersResolver.users({ skip, take, cursor, where, orderBy }),
-      ).rejects.toThrow(Error);
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 
@@ -250,6 +306,7 @@ describe('UsersResolver', () => {
         email: 'john@example.com',
         password: 'password123',
       };
+
       const createdUser: User = {
         id: '1',
         name: 'John Doe',
@@ -259,8 +316,25 @@ describe('UsersResolver', () => {
         updatedAt: new Date(),
         auth0Id: 'auth0|1234567890',
       };
+
       jest.spyOn(usersService, 'createUser').mockResolvedValue(createdUser);
+
       expect(await usersResolver.createUser(data)).toEqual(createdUser);
+    });
+
+    it('should return undefined with empty args', async () => {
+      const data = {
+        name: '',
+        email: '',
+        password: '',
+        auth0Id: '',
+      };
+
+      jest.spyOn(usersService, 'createUser').mockResolvedValue(undefined);
+
+      await expect(usersResolver.createUser(data)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw InternalServerErrorException if an error occurs', async () => {
@@ -314,6 +388,22 @@ describe('UsersResolver', () => {
       expect(await usersResolver.updateUser(data)).toEqual(updatedUser);
     });
 
+    it('should return undefined with empty args', async () => {
+      const data: UpdateOneUserArgs = {
+        data: {
+          name: { set: '' },
+          email: { set: '' },
+        },
+        where: { id: '1' },
+      };
+
+      jest.spyOn(usersService, 'updateUser').mockResolvedValue(undefined);
+
+      await expect(usersResolver.updateUser(data)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
     it('should throw InternalServerErrorException if an error occurs', async () => {
       const currentUser: User = {
         id: '1',
@@ -359,6 +449,16 @@ describe('UsersResolver', () => {
       jest.spyOn(usersService, 'deleteUser').mockResolvedValue(deletedUser);
 
       expect(await usersResolver.deleteUser({ where })).toEqual(deletedUser);
+    });
+
+    it('should return undefined with empty args', async () => {
+      const where = { id: '' };
+
+      jest.spyOn(usersService, 'deleteUser').mockResolvedValue(undefined);
+
+      await expect(usersResolver.deleteUser({ where })).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw InternalServerErrorException if an error occurs', async () => {
@@ -428,7 +528,7 @@ describe('UsersResolver', () => {
 
     it('should return an array of videos', async () => {
       jest
-        .spyOn(usersResolver, 'invitedVideos')
+        .spyOn(invitedVideosDataLoader, 'load')
         .mockResolvedValue(invitedVideos);
 
       expect(await usersResolver.invitedVideos(user, query)).toEqual(
@@ -447,7 +547,7 @@ describe('UsersResolver', () => {
         updatedAt: new Date(),
       };
 
-      jest.spyOn(usersResolver, 'invitedVideos').mockResolvedValue([]);
+      jest.spyOn(invitedVideosDataLoader, 'load').mockResolvedValue([]);
 
       expect(await usersResolver.invitedVideos(user, query)).toEqual([]);
     });
@@ -506,13 +606,13 @@ describe('UsersResolver', () => {
     };
 
     it('should return an array of videos', async () => {
-      jest.spyOn(usersResolver, 'ownVideos').mockResolvedValue(ownVideos);
+      jest.spyOn(ownVideosDataLoader, 'load').mockResolvedValue(ownVideos);
 
       expect(await usersResolver.ownVideos(user, query)).toEqual(ownVideos);
     });
 
     it('should return an empty array if no videos are found', async () => {
-      jest.spyOn(usersResolver, 'ownVideos').mockResolvedValue([]);
+      jest.spyOn(ownVideosDataLoader, 'load').mockResolvedValue([]);
 
       expect(await usersResolver.ownVideos(user, query)).toEqual([]);
     });

@@ -7,7 +7,11 @@ import {
   ResolveField,
   Parent,
 } from '@nestjs/graphql';
-import { NotFoundException, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { FindManyUserArgs } from 'src/generated/user/find-many-user.args';
 import { FindUniqueUserArgs } from 'src/generated/user/find-unique-user.args';
@@ -110,19 +114,37 @@ export class UsersResolver {
 
   @UseGuards(MemberGuard)
   @Mutation((returns) => UserModel, { description: 'Create a user' })
-  async createUser(@Args('data') query: UserCreateInput): Promise<UserModel> {
-    return this.usersService.createUser(query);
+  async createUser(@Args('data') query: UserCreateInput) {
+    const user = await this.usersService.createUser(query);
+
+    if (!user) {
+      throw new BadRequestException('User not created');
+    }
+
+    return user;
   }
 
   @UseGuards(MemberGuard)
   @Mutation((returns) => UserModel, { description: 'Update a user' })
   async updateUser(@Args() query: UpdateOneUserArgs): Promise<UserModel> {
-    return this.usersService.updateUser(query);
+    const user = await this.usersService.updateUser(query);
+
+    if (!user) {
+      throw new BadRequestException('User not updated');
+    }
+
+    return user;
   }
 
   @UseGuards(MemberGuard)
   @Mutation((returns) => UserModel, { description: 'Delete a user' })
   async deleteUser(@Args() query: DeleteOneUserArgs): Promise<UserModel> {
-    return this.usersService.deleteUser(query);
+    const user = await this.usersService.deleteUser(query);
+
+    if (!user) {
+      throw new BadRequestException('User not deleted');
+    }
+
+    return user;
   }
 }

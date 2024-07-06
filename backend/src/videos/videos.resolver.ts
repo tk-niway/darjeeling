@@ -14,6 +14,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import {
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
 import { UtilsService } from 'src/utils/utils.service';
@@ -64,16 +65,22 @@ export class VideosResolver {
 
   @Query(() => VideoModel, { description: 'Get a video by ID' })
   async video(@Args() data: FindUniqueVideoArgs) {
-    return await this.videosService.video(data);
+    const video = await this.videosService.video(data);
+
+    if (!video) {
+      throw new NotFoundException('Video not found');
+    }
+
+    return video;
   }
 
   @Query(() => PaginatedVideo, { description: 'Get all videos' })
   async videos(@Args() query: FindManyVideoArgs) {
     query = this.utilsService.findManyArgsValidation(query);
 
-    const videos = await this.videosService.videos(query);
-
-    const totalCount = await this.videosService.totalCount(query);
+    const { videos, totalCount } = await this.videosService.videosWithCount(
+      query,
+    );
 
     const edges = this.utilsService.generateEdges(videos);
 
@@ -116,11 +123,7 @@ export class VideosResolver {
       },
     });
 
-    const result = this.videosService.storeVideo(file, video);
-
-    if (!result) {
-      throw new InternalServerErrorException('Error storing video');
-    }
+    this.videosService.storeVideo(file, video);
 
     return video;
   }
@@ -128,12 +131,24 @@ export class VideosResolver {
   @UseGuards(MemberGuard)
   @Mutation(() => VideoModel, { description: 'Update a video' })
   async updateVideo(@Args() query: UpdateOneVideoArgs) {
-    return await this.videosService.updateVideo(query);
+    const video = await this.videosService.updateVideo(query);
+
+    if (!video) {
+      throw new BadRequestException('Video not updated');
+    }
+
+    return video;
   }
 
   @UseGuards(MemberGuard)
   @Mutation(() => Boolean, { description: 'Delete a video' })
   async deleteVideo(@Args() query: DeleteOneVideoArgs) {
-    return await this.videosService.deleteVideo(query);
+    const video = await this.videosService.deleteVideo(query);
+
+    if (!video) {
+      throw new BadRequestException('Video not deleted');
+    }
+
+    return video;
   }
 }

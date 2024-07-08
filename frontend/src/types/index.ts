@@ -36,6 +36,7 @@ export type AuthUserContextType = {
       GetTokenSilentlyVerboseResponse | string
     >;
   };
+  token: string | null;
   hasToken: boolean;
 };
 

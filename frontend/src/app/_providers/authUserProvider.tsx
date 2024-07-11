@@ -40,16 +40,18 @@ export const AuthUserProvider = ({
 }: AuthUserProviderOptions): JSX.Element => {
   const [authUser, setAuthUser] = useState<User>(user);
   const { token, setToken } = useToken();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
   const client = useApolloClient();
   const {
     loginWithRedirect,
     logout,
-    isAuthenticated: hasToken,
+    isAuthenticated,
     getAccessTokenSilently,
+    isLoading: auth0IsLoading,
   } = useAuth0();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // If user has auth0 token but not signed in, try to sign in user
   useEffect(() => {
     const _getAuthUser = async () => {
       setIsLoading(true);
@@ -68,7 +70,7 @@ export const AuthUserProvider = ({
 
       if (result) {
         setAuthUser(result);
-        setIsAuthenticated(true);
+        setIsSignedIn(true);
         setIsLoading(false);
       }
     };
@@ -77,6 +79,7 @@ export const AuthUserProvider = ({
     if (token && !authUser?.id) _getAuthUser();
   }, [token]);
 
+  // If user is authenticated, get access token
   useEffect(() => {
     const _getToken = async () => {
       try {
@@ -92,40 +95,36 @@ export const AuthUserProvider = ({
       }
     };
 
-    if (hasToken) _getToken();
-  }, [hasToken]);
+    if (auth0IsLoading) setIsLoading(true);
+
+    if (!auth0IsLoading && isAuthenticated) {
+      setIsLoading(true);
+      _getToken();
+    }
+
+    if (!auth0IsLoading && !isAuthenticated) setIsLoading(false);
+  }, [isAuthenticated, auth0IsLoading]);
 
   /**
    * Signs out the user.
    */
   const signout = useCallback(() => {
     setToken(null);
-    setIsAuthenticated(false);
+    setIsSignedIn(false);
     setAuthUser({} as User);
     logout();
-  }, [setToken, setIsAuthenticated, setAuthUser, logout]);
+  }, [setToken, setIsSignedIn, setAuthUser, logout]);
 
   const contextValue = useMemo<AuthUserContextType>(() => {
     return {
       authUser,
-      isAuthenticated,
+      isSignedIn,
       isLoading,
-      setAuthUser,
       loginWithRedirect,
       signout,
-      getAccessTokenSilently,
-      hasToken,
+      token,
     };
-  }, [
-    authUser,
-    isAuthenticated,
-    isLoading,
-    setAuthUser,
-    loginWithRedirect,
-    signout,
-    getAccessTokenSilently,
-    hasToken,
-  ]);
+  }, [authUser, isSignedIn, isLoading, loginWithRedirect, signout, token]);
 
   return (
     <AuthUserContext.Provider value={contextValue}>

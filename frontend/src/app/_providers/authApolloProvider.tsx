@@ -120,7 +120,7 @@ function observableAccessToken({
             // Re-add old headers
             ...headers,
             // Switch out old access token for new one
-            authorization: token ? `Bearer ${token}` : null,
+            authorization: token ? `Bearer ${token}` : "",
           },
         }));
       })

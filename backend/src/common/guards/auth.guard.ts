@@ -33,8 +33,12 @@ export class AuthGuard extends PassportAuthGuard('jwt') {
     status?: any,
   ) {
     // The user's token is expired
-    if (!user || info == 'TokenExpiredError: jwt expired')
-      throw new UnauthorizedException(info.name);
+    if (!user || info == 'TokenExpiredError: jwt expired') {
+      //throw new UnauthorizedException(info.name);
+      // !fIXME: This is a temporary fix to prevent the server from crashing
+      console.error('TokenExpiredError: jwt expired');
+      return {};
+    }
 
     return super.handleRequest(err, user, info, context, status);
   }

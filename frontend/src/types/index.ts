@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import { AppState, RedirectLoginOptions } from "@auth0/auth0-react";
-import { User } from "@/types/generated/graphqlTypes";
+import { User } from "@/generated/types";
 
-export * from "@/types/generated/graphqlTypes";
+export * from "@/generated/types";
 
 export type AuthApolloContextType = {
   token: string | null;

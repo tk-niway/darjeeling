@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -1479,3 +1480,52 @@ export type Resolvers<ContextType = any> = {
   VideoModelEdge?: VideoModelEdgeResolvers<ContextType>;
 };
 
+
+export type UserAndVideosQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type UserAndVideosQuery = { __typename?: 'Query', user: { __typename?: 'UserModel', createdAt: any, email: string, id: string, name: string, updatedAt: any, auth0Id: string }, videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', id: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string } } };
+
+
+export const UserAndVideosDocument = gql`
+    query UserAndVideos($id: String!) {
+  user(where: {id: $id}) {
+    createdAt
+    email
+    id
+    name
+    updatedAt
+    auth0Id
+  }
+  videos(where: {Owner: {is: {id: {equals: $id}}}}) {
+    nodes {
+      createdAt
+      description
+      duration
+      id
+      isActive
+      ownerId
+      playCount
+      thumbnailUrl
+      title
+      updatedAt
+      uploadStatus
+      url
+      visibility
+      Guests {
+        id
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+    totalCount
+  }
+}
+    `;
+export type UserAndVideosQueryResult = Apollo.QueryResult<UserAndVideosQuery, UserAndVideosQueryVariables>;

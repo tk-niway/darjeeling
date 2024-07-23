@@ -70,7 +70,14 @@ export default function AppHeader() {
                 <MenuItem onClick={handleClose}>
                   <Link href="/channel">Profile</Link>
                 </MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Link href={`/users/${authUser.id}`}>My account</Link>
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Link href={`/users/${authUser.id}/videos/upload`}>
+                    Upload Video
+                  </Link>
+                </MenuItem>
                 <MenuItem
                   data-testid="signout-button"
                   onClick={() => signout()}

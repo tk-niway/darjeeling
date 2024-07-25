@@ -292,7 +292,7 @@ export class VideosService {
 
       return this.configService.get('fileUrl') + filename;
     } catch (error) {
-      console.error(error);
+      console.error('error createThumbnail', error);
       throw new InternalServerErrorException('Error creating thumbnail');
     }
   }
@@ -302,9 +302,15 @@ export class VideosService {
     thumbnailFilePath: string,
     filename: string,
     size: string = '1280x720',
-    timemarks: number[] | string[] | undefined = [3],
+    timemarks: number[] | string[] | undefined = [2],
   ): Promise<boolean> {
-    console.log('Generating thumbnail', { videoFilePath, thumbnailFilePath });
+    console.log('Generating thumbnail', {
+      videoFilePath,
+      thumbnailFilePath,
+      filename,
+      size,
+      timemarks,
+    });
 
     return new Promise((resolve, reject) => {
       ffmpeg(videoFilePath)
@@ -317,10 +323,16 @@ export class VideosService {
         })
         .on('error', (err) => {
           console.error('Error generating thumbnail:', err);
-          reject(err);
+        })
+        .on('stderr', (stderrLine) => {
+          // console.error('stderr output:', stderrLine);
         })
         .autopad(true, 'black')
         .aspectRatio('16:9')
+        .outputOptions('-frames:v 1') // 単一のフレームを出力
+        .outputOptions('-update 1') // 単一画像の場合のオプションを追加
+        // .output(thumbnailFilePath + '/' + filename) // screenshots以外でスクショを取る方法
+        // .run(); // screenshots以外でスクショを取る方法
         .screenshots({
           count: 1,
           folder: thumbnailFilePath,
@@ -338,6 +350,7 @@ export class VideosService {
     );
 
     if (!existsSync(filePath)) {
+      console.error('Thumbnail file not found', { filePath });
       throw new NotFoundException('Video file not found');
     }
 

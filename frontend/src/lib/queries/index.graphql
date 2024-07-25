@@ -1,0 +1,73 @@
+query UserAndVideos($id: String!) {
+  user(where: { id: $id }) {
+    createdAt
+    email
+    id
+    name
+    updatedAt
+    auth0Id
+  }
+  videos(where: { Owner: { is: { id: { equals: $id } } } }) {
+    nodes {
+      createdAt
+      description
+      duration
+      id
+      isActive
+      ownerId
+      playCount
+      thumbnailUrl
+      title
+      updatedAt
+      uploadStatus
+      url
+      visibility
+      Guests {
+        id
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+    totalCount
+  }
+}
+
+mutation UploadVideo($file: Upload!) {
+  uploadVideo(file: $file) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+  }
+}
+
+mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!) {
+  updateVideo(data: $data, where: { id: $videoId }) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+  }
+}

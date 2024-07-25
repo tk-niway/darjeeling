@@ -1488,6 +1488,21 @@ export type UserAndVideosQueryVariables = Exact<{
 
 export type UserAndVideosQuery = { __typename?: 'Query', user: { __typename?: 'UserModel', createdAt: any, email: string, id: string, name: string, updatedAt: any, auth0Id: string }, videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', id: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string } } };
 
+export type UploadVideoMutationVariables = Exact<{
+  file: Scalars['Upload']['input'];
+}>;
+
+
+export type UploadVideoMutation = { __typename?: 'Mutation', uploadVideo: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } };
+
+export type UpdateVideoMutationVariables = Exact<{
+  data: VideoUpdateInput;
+  videoId: Scalars['String']['input'];
+}>;
+
+
+export type UpdateVideoMutation = { __typename?: 'Mutation', updateVideo: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } };
+
 
 export const UserAndVideosDocument = gql`
     query UserAndVideos($id: String!) {
@@ -1529,3 +1544,47 @@ export const UserAndVideosDocument = gql`
 }
     `;
 export type UserAndVideosQueryResult = Apollo.QueryResult<UserAndVideosQuery, UserAndVideosQueryVariables>;
+export const UploadVideoDocument = gql`
+    mutation UploadVideo($file: Upload!) {
+  uploadVideo(file: $file) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+  }
+}
+    `;
+export type UploadVideoMutationFn = Apollo.MutationFunction<UploadVideoMutation, UploadVideoMutationVariables>;
+export type UploadVideoMutationResult = Apollo.MutationResult<UploadVideoMutation>;
+export type UploadVideoMutationOptions = Apollo.BaseMutationOptions<UploadVideoMutation, UploadVideoMutationVariables>;
+export const UpdateVideoDocument = gql`
+    mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!) {
+  updateVideo(data: $data, where: {id: $videoId}) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+  }
+}
+    `;
+export type UpdateVideoMutationFn = Apollo.MutationFunction<UpdateVideoMutation, UpdateVideoMutationVariables>;
+export type UpdateVideoMutationResult = Apollo.MutationResult<UpdateVideoMutation>;
+export type UpdateVideoMutationOptions = Apollo.BaseMutationOptions<UpdateVideoMutation, UpdateVideoMutationVariables>;

@@ -141,7 +141,7 @@ export class VideosResolver {
   }
 
   @UseGuards(MemberGuard)
-  @Mutation(() => Boolean, { description: 'Delete a video' })
+  @Mutation(() => VideoModel, { description: 'Delete a video' })
   async deleteVideo(@Args() query: DeleteOneVideoArgs) {
     const video = await this.videosService.deleteVideo(query);
 

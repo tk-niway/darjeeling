@@ -120,8 +120,70 @@ export function useUploadVideoMutation(baseOptions?: Apollo.MutationHookOptions<
 export type UploadVideoMutationHookResult = ReturnType<typeof useUploadVideoMutation>;
 export type UploadVideoMutationResult = Apollo.MutationResult<generatedTypes.UploadVideoMutation>;
 export type UploadVideoMutationOptions = Apollo.BaseMutationOptions<generatedTypes.UploadVideoMutation, generatedTypes.UploadVideoMutationVariables>;
+export const VideoDocument = gql`
+    query Video($videoId: String!, $guestNumber: Int) {
+  video(where: {id: $videoId}) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+    Guests(take: $guestNumber) {
+      auth0Id
+      createdAt
+      email
+      id
+      isActive
+      name
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useVideoQuery__
+ *
+ * To run a query within a React component, call `useVideoQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVideoQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVideoQuery({
+ *   variables: {
+ *      videoId: // value for 'videoId'
+ *      guestNumber: // value for 'guestNumber'
+ *   },
+ * });
+ */
+export function useVideoQuery(baseOptions: Apollo.QueryHookOptions<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables> & ({ variables: generatedTypes.VideoQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>(VideoDocument, options);
+      }
+export function useVideoLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>(VideoDocument, options);
+        }
+export function useVideoSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>(VideoDocument, options);
+        }
+export type VideoQueryHookResult = ReturnType<typeof useVideoQuery>;
+export type VideoLazyQueryHookResult = ReturnType<typeof useVideoLazyQuery>;
+export type VideoSuspenseQueryHookResult = ReturnType<typeof useVideoSuspenseQuery>;
+export type VideoQueryResult = Apollo.QueryResult<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>;
 export const UpdateVideoDocument = gql`
-    mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!) {
+    mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!, $guestNumber: Int) {
   updateVideo(data: $data, where: {id: $videoId}) {
     createdAt
     description
@@ -136,6 +198,15 @@ export const UpdateVideoDocument = gql`
     uploadStatus
     url
     visibility
+    Guests(take: $guestNumber) {
+      auth0Id
+      createdAt
+      email
+      id
+      isActive
+      name
+      updatedAt
+    }
   }
 }
     `;
@@ -156,6 +227,7 @@ export type UpdateVideoMutationFn = Apollo.MutationFunction<generatedTypes.Updat
  *   variables: {
  *      data: // value for 'data'
  *      videoId: // value for 'videoId'
+ *      guestNumber: // value for 'guestNumber'
  *   },
  * });
  */
@@ -166,3 +238,46 @@ export function useUpdateVideoMutation(baseOptions?: Apollo.MutationHookOptions<
 export type UpdateVideoMutationHookResult = ReturnType<typeof useUpdateVideoMutation>;
 export type UpdateVideoMutationResult = Apollo.MutationResult<generatedTypes.UpdateVideoMutation>;
 export type UpdateVideoMutationOptions = Apollo.BaseMutationOptions<generatedTypes.UpdateVideoMutation, generatedTypes.UpdateVideoMutationVariables>;
+export const DeleteVideoDocument = gql`
+    mutation DeleteVideo($videoId: String!) {
+  deleteVideo(where: {id: $videoId}) {
+    description
+    duration
+    createdAt
+    id
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+  }
+}
+    `;
+export type DeleteVideoMutationFn = Apollo.MutationFunction<generatedTypes.DeleteVideoMutation, generatedTypes.DeleteVideoMutationVariables>;
+
+/**
+ * __useDeleteVideoMutation__
+ *
+ * To run a mutation, you first call `useDeleteVideoMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteVideoMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteVideoMutation, { data, loading, error }] = useDeleteVideoMutation({
+ *   variables: {
+ *      videoId: // value for 'videoId'
+ *   },
+ * });
+ */
+export function useDeleteVideoMutation(baseOptions?: Apollo.MutationHookOptions<generatedTypes.DeleteVideoMutation, generatedTypes.DeleteVideoMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<generatedTypes.DeleteVideoMutation, generatedTypes.DeleteVideoMutationVariables>(DeleteVideoDocument, options);
+      }
+export type DeleteVideoMutationHookResult = ReturnType<typeof useDeleteVideoMutation>;
+export type DeleteVideoMutationResult = Apollo.MutationResult<generatedTypes.DeleteVideoMutation>;
+export type DeleteVideoMutationOptions = Apollo.BaseMutationOptions<generatedTypes.DeleteVideoMutation, generatedTypes.DeleteVideoMutationVariables>;

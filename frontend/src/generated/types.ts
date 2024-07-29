@@ -105,7 +105,7 @@ export type Mutation = {
   /** Delete a user */
   deleteUser: UserModel;
   /** Delete a video */
-  deleteVideo: Scalars['Boolean']['output'];
+  deleteVideo: VideoModel;
   signup: UserWithError;
   /** Update a user */
   updateUser: UserModel;
@@ -1316,7 +1316,7 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createUser?: Resolver<ResolversTypes['UserModel'], ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'data'>>;
   deleteUser?: Resolver<ResolversTypes['UserModel'], ParentType, ContextType, RequireFields<MutationDeleteUserArgs, 'where'>>;
-  deleteVideo?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteVideoArgs, 'where'>>;
+  deleteVideo?: Resolver<ResolversTypes['VideoModel'], ParentType, ContextType, RequireFields<MutationDeleteVideoArgs, 'where'>>;
   signup?: Resolver<ResolversTypes['UserWithError'], ParentType, ContextType>;
   updateUser?: Resolver<ResolversTypes['UserModel'], ParentType, ContextType, RequireFields<MutationUpdateUserArgs, 'data' | 'where'>>;
   updateVideo?: Resolver<ResolversTypes['VideoModel'], ParentType, ContextType, RequireFields<MutationUpdateVideoArgs, 'data' | 'where'>>;
@@ -1495,13 +1495,29 @@ export type UploadVideoMutationVariables = Exact<{
 
 export type UploadVideoMutation = { __typename?: 'Mutation', uploadVideo: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } };
 
+export type VideoQueryVariables = Exact<{
+  videoId: Scalars['String']['input'];
+  guestNumber?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type VideoQuery = { __typename?: 'Query', video: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', auth0Id: string, createdAt: any, email: string, id: string, isActive: boolean, name: string, updatedAt: any }> } };
+
 export type UpdateVideoMutationVariables = Exact<{
   data: VideoUpdateInput;
+  videoId: Scalars['String']['input'];
+  guestNumber?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type UpdateVideoMutation = { __typename?: 'Mutation', updateVideo: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', auth0Id: string, createdAt: any, email: string, id: string, isActive: boolean, name: string, updatedAt: any }> } };
+
+export type DeleteVideoMutationVariables = Exact<{
   videoId: Scalars['String']['input'];
 }>;
 
 
-export type UpdateVideoMutation = { __typename?: 'Mutation', updateVideo: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } };
+export type DeleteVideoMutation = { __typename?: 'Mutation', deleteVideo: { __typename?: 'VideoModel', description?: string | null, duration?: number | null, createdAt: any, id: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } };
 
 
 export const UserAndVideosDocument = gql`
@@ -1566,8 +1582,37 @@ export const UploadVideoDocument = gql`
 export type UploadVideoMutationFn = Apollo.MutationFunction<UploadVideoMutation, UploadVideoMutationVariables>;
 export type UploadVideoMutationResult = Apollo.MutationResult<UploadVideoMutation>;
 export type UploadVideoMutationOptions = Apollo.BaseMutationOptions<UploadVideoMutation, UploadVideoMutationVariables>;
+export const VideoDocument = gql`
+    query Video($videoId: String!, $guestNumber: Int) {
+  video(where: {id: $videoId}) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+    Guests(take: $guestNumber) {
+      auth0Id
+      createdAt
+      email
+      id
+      isActive
+      name
+      updatedAt
+    }
+  }
+}
+    `;
+export type VideoQueryResult = Apollo.QueryResult<VideoQuery, VideoQueryVariables>;
 export const UpdateVideoDocument = gql`
-    mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!) {
+    mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!, $guestNumber: Int) {
   updateVideo(data: $data, where: {id: $videoId}) {
     createdAt
     description
@@ -1582,9 +1627,38 @@ export const UpdateVideoDocument = gql`
     uploadStatus
     url
     visibility
+    Guests(take: $guestNumber) {
+      auth0Id
+      createdAt
+      email
+      id
+      isActive
+      name
+      updatedAt
+    }
   }
 }
     `;
 export type UpdateVideoMutationFn = Apollo.MutationFunction<UpdateVideoMutation, UpdateVideoMutationVariables>;
 export type UpdateVideoMutationResult = Apollo.MutationResult<UpdateVideoMutation>;
 export type UpdateVideoMutationOptions = Apollo.BaseMutationOptions<UpdateVideoMutation, UpdateVideoMutationVariables>;
+export const DeleteVideoDocument = gql`
+    mutation DeleteVideo($videoId: String!) {
+  deleteVideo(where: {id: $videoId}) {
+    description
+    duration
+    createdAt
+    id
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+  }
+}
+    `;
+export type DeleteVideoMutationFn = Apollo.MutationFunction<DeleteVideoMutation, DeleteVideoMutationVariables>;
+export type DeleteVideoMutationResult = Apollo.MutationResult<DeleteVideoMutation>;
+export type DeleteVideoMutationOptions = Apollo.BaseMutationOptions<DeleteVideoMutation, DeleteVideoMutationVariables>;

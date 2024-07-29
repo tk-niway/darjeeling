@@ -54,7 +54,38 @@ mutation UploadVideo($file: Upload!) {
   }
 }
 
-mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!) {
+query Video($videoId: String!, $guestNumber: Int) {
+  video(where: { id: $videoId }) {
+    createdAt
+    description
+    duration
+    id
+    isActive
+    ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+    Guests(take: $guestNumber) {
+      auth0Id
+      createdAt
+      email
+      id
+      isActive
+      name
+      updatedAt
+    }
+  }
+}
+
+mutation UpdateVideo(
+  $data: VideoUpdateInput!
+  $videoId: String!
+  $guestNumber: Int
+) {
   updateVideo(data: $data, where: { id: $videoId }) {
     createdAt
     description
@@ -62,6 +93,31 @@ mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!) {
     id
     isActive
     ownerId
+    playCount
+    thumbnailUrl
+    title
+    updatedAt
+    uploadStatus
+    url
+    visibility
+    Guests(take: $guestNumber) {
+      auth0Id
+      createdAt
+      email
+      id
+      isActive
+      name
+      updatedAt
+    }
+  }
+}
+
+mutation DeleteVideo($videoId: String!) {
+  deleteVideo(where: { id: $videoId }) {
+    description
+    duration
+    createdAt
+    id
     playCount
     thumbnailUrl
     title

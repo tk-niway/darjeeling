@@ -7,6 +7,7 @@ import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { useParams } from "next/navigation";
 import { useUserAndVideosQuery } from "@/lib/hooks";
 import { UserAndVideosQuery } from "@/types";
+import Link from "next/link";
 
 // TODO optimize the layout for videos & user
 export default function page() {
@@ -89,7 +90,9 @@ export default function page() {
 function videosCard(video: any) {
   return (
     <div key={video.id}>
-      <p>{video?.title}</p>
+      <Link href={`${video.ownerId}/videos/edit/${video.id}`}>
+        <p>{video?.title}</p>
+      </Link>
       <p>{video?.description}</p>
       <p>{video?.playCount}</p>
       <p>{video?.url}</p>

@@ -1,4 +1,5 @@
 "use client";
+import { useAuthUser } from "@/app/_providers/authUserProvider";
 import {
   useUpdateVideoMutation,
   useVideoQuery,
@@ -8,8 +9,9 @@ import { VideoVisibility } from "@/types";
 import { convertInputData4Prisma } from "@/utils/gqlQuery";
 import { Button } from "@mui/material";
 import { redirect, useParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import ReactPlayer from "react-player";
 
 type Inputs = {
   title: string;
@@ -18,19 +20,17 @@ type Inputs = {
 };
 
 export default function editPage() {
+  const { token, isLoading } = useAuthUser();
+  const [videoUrl, setVideoUrl] = useState("");
   const { videoId, userId } = useParams<{ videoId: string; userId: string }>();
-
   const { data, loading, error } = useVideoQuery({
     variables: {
       videoId: videoId,
       guestNumber: 10,
     },
   });
-
   const [updateVideoMutation, updatedResult] = useUpdateVideoMutation();
-
   const [deleteVideoMutation, deletedResult] = useDeleteVideoMutation();
-
   const {
     register,
     handleSubmit,
@@ -102,11 +102,65 @@ export default function editPage() {
     }
   }, [loading]);
 
+  // Fetch video URL
+  useEffect(() => {
+    const fetchVideoUrl = async () => {
+      console.log("Fetching video URL", { videoId, token });
+
+      if (!videoId) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:3333/videos/${videoId}`,
+          {
+            headers: {
+              Authorization: token ? `Bearer ${token}` : "",
+            },
+          }
+        );
+
+        console.log({ response });
+        if (!response.ok) throw new Error("Video not found");
+
+        const filePath = await response.text();
+
+        console.log({ filePath });
+
+        setVideoUrl(filePath);
+      } catch (error) {
+        console.error("Error fetching video URL:", error);
+      }
+    };
+
+    if (!isLoading) fetchVideoUrl();
+  }, [token, isLoading, videoId]);
+
   if (loading) return <div>fetching...</div>;
 
   return (
     <>
       <h1>Edit Video</h1>
+      {videoUrl && (
+        <ReactPlayer
+          url={videoUrl}
+          controls
+          playsinline
+          onError={(error) => console.error("Player Error:", error)}
+          config={{
+            file: {
+              hlsOptions: {
+                forceHLS: true,
+                debug: false,
+                xhrSetup: (xhr: XMLHttpRequest) => {
+                  if (token)
+                    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+                },
+              },
+            },
+          }}
+        />
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <label htmlFor="title">Title</label>
         <br />

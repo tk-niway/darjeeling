@@ -81,6 +81,56 @@ query Video($videoId: String!, $guestNumber: Int) {
   }
 }
 
+query publicVideos(
+  $cursor: VideoWhereUniqueInput
+  $take: Int
+  $skip: Int
+  $where: VideoWhereInput
+) {
+  videos(cursor: $cursor, skip: $skip, take: $take, where: $where) {
+    totalCount
+    nodes {
+      createdAt
+      description
+      duration
+      id
+      isActive
+      ownerId
+      playCount
+      thumbnailUrl
+      title
+      updatedAt
+      uploadStatus
+      url
+      visibility
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+    edges {
+      cursor
+      node {
+        createdAt
+        description
+        duration
+        id
+        isActive
+        ownerId
+        playCount
+        thumbnailUrl
+        title
+        updatedAt
+        uploadStatus
+        url
+        visibility
+      }
+    }
+  }
+}
+
 mutation UpdateVideo(
   $data: VideoUpdateInput!
   $videoId: String!

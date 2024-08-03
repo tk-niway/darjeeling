@@ -182,6 +182,88 @@ export type VideoQueryHookResult = ReturnType<typeof useVideoQuery>;
 export type VideoLazyQueryHookResult = ReturnType<typeof useVideoLazyQuery>;
 export type VideoSuspenseQueryHookResult = ReturnType<typeof useVideoSuspenseQuery>;
 export type VideoQueryResult = Apollo.QueryResult<generatedTypes.VideoQuery, generatedTypes.VideoQueryVariables>;
+export const PublicVideosDocument = gql`
+    query publicVideos($cursor: VideoWhereUniqueInput, $take: Int, $skip: Int, $where: VideoWhereInput) {
+  videos(cursor: $cursor, skip: $skip, take: $take, where: $where) {
+    totalCount
+    nodes {
+      createdAt
+      description
+      duration
+      id
+      isActive
+      ownerId
+      playCount
+      thumbnailUrl
+      title
+      updatedAt
+      uploadStatus
+      url
+      visibility
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+    edges {
+      cursor
+      node {
+        createdAt
+        description
+        duration
+        id
+        isActive
+        ownerId
+        playCount
+        thumbnailUrl
+        title
+        updatedAt
+        uploadStatus
+        url
+        visibility
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __usePublicVideosQuery__
+ *
+ * To run a query within a React component, call `usePublicVideosQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePublicVideosQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePublicVideosQuery({
+ *   variables: {
+ *      cursor: // value for 'cursor'
+ *      take: // value for 'take'
+ *      skip: // value for 'skip'
+ *      where: // value for 'where'
+ *   },
+ * });
+ */
+export function usePublicVideosQuery(baseOptions?: Apollo.QueryHookOptions<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>(PublicVideosDocument, options);
+      }
+export function usePublicVideosLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>(PublicVideosDocument, options);
+        }
+export function usePublicVideosSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>(PublicVideosDocument, options);
+        }
+export type PublicVideosQueryHookResult = ReturnType<typeof usePublicVideosQuery>;
+export type PublicVideosLazyQueryHookResult = ReturnType<typeof usePublicVideosLazyQuery>;
+export type PublicVideosSuspenseQueryHookResult = ReturnType<typeof usePublicVideosSuspenseQuery>;
+export type PublicVideosQueryResult = Apollo.QueryResult<generatedTypes.PublicVideosQuery, generatedTypes.PublicVideosQueryVariables>;
 export const UpdateVideoDocument = gql`
     mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!, $guestNumber: Int) {
   updateVideo(data: $data, where: {id: $videoId}) {

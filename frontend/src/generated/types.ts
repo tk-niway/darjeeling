@@ -1503,6 +1503,16 @@ export type VideoQueryVariables = Exact<{
 
 export type VideoQuery = { __typename?: 'Query', video: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', auth0Id: string, createdAt: any, email: string, id: string, isActive: boolean, name: string, updatedAt: any }> } };
 
+export type PublicVideosQueryVariables = Exact<{
+  cursor?: InputMaybe<VideoWhereUniqueInput>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  where?: InputMaybe<VideoWhereInput>;
+}>;
+
+
+export type PublicVideosQuery = { __typename?: 'Query', videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string }, edges?: Array<{ __typename?: 'VideoModelEdge', cursor: string, node: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } }> | null } };
+
 export type UpdateVideoMutationVariables = Exact<{
   data: VideoUpdateInput;
   videoId: Scalars['String']['input'];
@@ -1611,6 +1621,53 @@ export const VideoDocument = gql`
 }
     `;
 export type VideoQueryResult = Apollo.QueryResult<VideoQuery, VideoQueryVariables>;
+export const PublicVideosDocument = gql`
+    query publicVideos($cursor: VideoWhereUniqueInput, $take: Int, $skip: Int, $where: VideoWhereInput) {
+  videos(cursor: $cursor, skip: $skip, take: $take, where: $where) {
+    totalCount
+    nodes {
+      createdAt
+      description
+      duration
+      id
+      isActive
+      ownerId
+      playCount
+      thumbnailUrl
+      title
+      updatedAt
+      uploadStatus
+      url
+      visibility
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+      hasPreviousPage
+      startCursor
+    }
+    edges {
+      cursor
+      node {
+        createdAt
+        description
+        duration
+        id
+        isActive
+        ownerId
+        playCount
+        thumbnailUrl
+        title
+        updatedAt
+        uploadStatus
+        url
+        visibility
+      }
+    }
+  }
+}
+    `;
+export type PublicVideosQueryResult = Apollo.QueryResult<PublicVideosQuery, PublicVideosQueryVariables>;
 export const UpdateVideoDocument = gql`
     mutation UpdateVideo($data: VideoUpdateInput!, $videoId: String!, $guestNumber: Int) {
   updateVideo(data: $data, where: {id: $videoId}) {

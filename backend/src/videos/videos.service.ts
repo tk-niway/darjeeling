@@ -212,7 +212,9 @@ export class VideosService {
     try {
       await this.processVideoToHLS(filepath, outPutFilepath);
 
-      const url = this.configService.get('videoUrl') + videoId;
+      const url =
+        this.configService.get('videoUrl') +
+        join(videoId, videoId + this.EXT_M3U8);
 
       console.log('HLS conversion completed', { filepath, url });
 

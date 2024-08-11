@@ -1,6 +1,4 @@
 "use client";
-import { useApolloClient, gql } from "@apollo/client";
-import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
@@ -10,6 +8,8 @@ import { UserAndVideosQuery } from "@/types";
 import Link from "next/link";
 
 // TODO optimize the layout for videos & user
+// Todo add modal to upload video
+// todo list sorting change asc
 export default function page() {
   const { authUser } = useAuthUser();
   const { userId } = useParams<{ userId: string }>();
@@ -38,12 +38,6 @@ export default function page() {
 
   useEffect(() => {
     if (!loading && data) {
-      console.log({
-        user: data.user,
-        videos: data.videos.nodes,
-        pageInfo: data.videos.pageInfo,
-        totalCount: data.videos.totalCount,
-      });
       setDisplayUser(data.user);
       setDisplayVideos(data.videos.nodes);
       setVideoPageInfo(data.videos.pageInfo);
@@ -51,36 +45,9 @@ export default function page() {
     }
   }, [loading]);
 
-  const client = useApolloClient();
-  const [file, setFile] = useState<File>();
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files;
-    console.log({ file });
-    if (file && file[0]) {
-      setFile(file[0]);
-    }
-  };
-
-  const uploadFile = () => {
-    const result = client.mutate({
-      mutation: gql`
-        mutation ($file: Upload!) {
-          upload(file: $file)
-        }
-      `,
-      variables: {
-        file,
-      },
-    });
-  };
   return (
     <>
-      <h1>UserA Videos</h1>
-      <input type="file" onChange={handleFileUpload} />
-      <br />
-      <br />
-      <Button onClick={uploadFile}>Upload</Button>
+      <h1>{displayUser.name} Videos</h1>
       {userSection(displayUser)}
       {videoSection(displayVideos, totalVideoCount)}
     </>

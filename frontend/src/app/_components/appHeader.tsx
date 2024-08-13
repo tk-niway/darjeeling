@@ -4,11 +4,11 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import { Button, Link } from "@mui/material";
+import { Button } from "@mui/material";
+import Link from "next/link";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { useState } from "react";
 
@@ -26,26 +26,19 @@ export default function AppHeader() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Photos
+          <Typography component="h1" variant="h5" sx={{ flexGrow: 1 }}>
+            <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
+              Videos
+            </Link>
           </Typography>
           {authUser.isActive ? (
             <div>
               <IconButton
                 size="large"
                 aria-label="account of current user"
-                aria-controls="menu-appbar"
+                aria-controls="menu-app-bar"
                 aria-haspopup="true"
                 onClick={handleMenu}
                 color="inherit"
@@ -68,9 +61,6 @@ export default function AppHeader() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleClose}>
-                  <Link href="/channel">Profile</Link>
-                </MenuItem>
-                <MenuItem onClick={handleClose}>
                   <Link href={`/users/${authUser.id}`}>My account</Link>
                 </MenuItem>
                 <MenuItem onClick={handleClose}>
@@ -82,7 +72,7 @@ export default function AppHeader() {
                   data-testid="signout-button"
                   onClick={() => signout()}
                 >
-                  サインアウト
+                  <Link href="">サインアウト</Link>
                 </MenuItem>
               </Menu>
             </div>

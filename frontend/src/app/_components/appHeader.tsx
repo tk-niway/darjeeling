@@ -4,13 +4,13 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import { Button, Link } from "@mui/material";
+import { Button } from "@mui/material";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { useState } from "react";
+import LinkNoneStyle from "@/app/_components/linkNoneStyle";
 
 export default function AppHeader() {
   const { loginWithRedirect, signout, authUser } = useAuthUser();
@@ -26,26 +26,17 @@ export default function AppHeader() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Photos
+          <Typography component="h1" variant="h5" sx={{ flexGrow: 1 }}>
+            <LinkNoneStyle href="/">Videos</LinkNoneStyle>
           </Typography>
           {authUser.isActive ? (
             <div>
               <IconButton
                 size="large"
                 aria-label="account of current user"
-                aria-controls="menu-appbar"
+                aria-controls="menu-app-bar"
                 aria-haspopup="true"
                 onClick={handleMenu}
                 color="inherit"
@@ -68,21 +59,20 @@ export default function AppHeader() {
                 onClose={handleClose}
               >
                 <MenuItem onClick={handleClose}>
-                  <Link href="/channel">Profile</Link>
+                  <LinkNoneStyle href={`/users/${authUser.id}`}>
+                    My account
+                  </LinkNoneStyle>
                 </MenuItem>
                 <MenuItem onClick={handleClose}>
-                  <Link href={`/users/${authUser.id}`}>My account</Link>
-                </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <Link href={`/users/${authUser.id}/videos/upload`}>
+                  <LinkNoneStyle href={`/users/${authUser.id}/videos/upload`}>
                     Upload Video
-                  </Link>
+                  </LinkNoneStyle>
                 </MenuItem>
                 <MenuItem
                   data-testid="signout-button"
                   onClick={() => signout()}
                 >
-                  サインアウト
+                  <LinkNoneStyle href="">サインアウト</LinkNoneStyle>
                 </MenuItem>
               </Menu>
             </div>

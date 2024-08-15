@@ -1,9 +1,9 @@
 "use client";
+import VideoCard from "@/app/_components/videoCard";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { usePublicVideosQuery } from "@/generated/hooks";
-import { VideoVisibility, PublicVideosQuery, VideoModel } from "@/types";
-import Link from "next/link";
-import React, { useState, useEffect, use } from "react";
+import { VideoVisibility, PublicVideosQuery } from "@/types";
+import React, { useState, useEffect } from "react";
 
 const VideoPlayer = () => {
   const { data, loading, error } = usePublicVideosQuery({
@@ -44,17 +44,7 @@ const VideoPlayer = () => {
       <div>
         {videos && videos.length === 0 && <p>No videos found</p>}
         {videos &&
-          videos.map((video) => (
-            <div key={video.id}>
-              <Link href={`/videos/${video.id}`}>
-                <h2>{video.title}</h2>
-              </Link>
-              <p>{video.description}</p>
-              <p>{video.playCount}</p>
-              <p>{video.url}</p>
-              <p>{video.duration}</p>
-            </div>
-          ))}
+          videos.map((video) => <VideoCard key={video.id} {...video} />)}
       </div>
     </>
   );

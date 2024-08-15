@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { useParams } from "next/navigation";
 import { useUserAndVideosQuery } from "@/lib/hooks";
-import { UserAndVideosQuery } from "@/types";
+import { UserAndVideosQuery, VideoModel } from "@/types";
 import Link from "next/link";
+import VideoCard from "@/app/_components/videoCard";
 
 // TODO optimize the layout for videos & user
 // Todo add modal to upload video

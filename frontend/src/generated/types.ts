@@ -1511,7 +1511,7 @@ export type PublicVideosQueryVariables = Exact<{
 }>;
 
 
-export type PublicVideosQuery = { __typename?: 'Query', videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string }, edges?: Array<{ __typename?: 'VideoModelEdge', cursor: string, node: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } }> | null } };
+export type PublicVideosQuery = { __typename?: 'Query', videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Owner: { __typename?: 'UserModel', id: string, name: string } }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string }, edges?: Array<{ __typename?: 'VideoModelEdge', cursor: string, node: { __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility } }> | null } };
 
 export type UpdateVideoMutationVariables = Exact<{
   data: VideoUpdateInput;
@@ -1631,7 +1631,10 @@ export const PublicVideosDocument = gql`
       duration
       id
       isActive
-      ownerId
+      Owner {
+        id
+        name
+      }
       playCount
       thumbnailUrl
       title

@@ -192,7 +192,10 @@ export const PublicVideosDocument = gql`
       duration
       id
       isActive
-      ownerId
+      Owner {
+        id
+        name
+      }
       playCount
       thumbnailUrl
       title

@@ -1,5 +1,5 @@
 "use client";
-import VideoCard from "@/app/_components/videoCard";
+import VideoCardList from "@/app/_components/videoCardList";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { usePublicVideosQuery } from "@/generated/hooks";
 import { VideoVisibility, PublicVideosQuery } from "@/types";
@@ -43,8 +43,7 @@ const VideoPlayer = () => {
       <h1>Videos</h1>
       <div>
         {videos && videos.length === 0 && <p>No videos found</p>}
-        {videos &&
-          videos.map((video) => <VideoCard key={video.id} {...video} />)}
+        {videos && VideoCardList(videos)}
       </div>
     </>
   );

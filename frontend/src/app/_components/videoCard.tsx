@@ -44,6 +44,7 @@ const Card = styled.div`
   flex-direction: column;
   margin: 0;
   width: 100%;
+  max-width: 480px;
   aspect-ratio: 16 / 9; /* 幅と高さの比率を固定 */
   box-sizing: border-box;
 `;

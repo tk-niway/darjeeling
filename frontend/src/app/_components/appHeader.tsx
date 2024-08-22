@@ -1,16 +1,17 @@
 "use client";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import MenuItem from "@mui/material/MenuItem";
-import Menu from "@mui/material/Menu";
-import { Button } from "@mui/material";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { useState } from "react";
 import LinkNoneStyle from "@/app/_components/linkNoneStyle";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  Button,
+} from "@mui/material";
+import AccountCircle from "@mui/icons-material/AccountCircle";
 
 export default function AppHeader() {
   const { loginWithRedirect, signout, authUser } = useAuthUser();
@@ -25,7 +26,7 @@ export default function AppHeader() {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <>
       <AppBar position="fixed">
         <Toolbar>
           <Typography component="h1" variant="h5" sx={{ flexGrow: 1 }}>
@@ -96,6 +97,7 @@ export default function AppHeader() {
           )}
         </Toolbar>
       </AppBar>
-    </Box>
+      <Toolbar /> {/* AppBarの高さ分のスペースを確保 */}
+    </>
   );
 }

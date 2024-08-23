@@ -4,6 +4,7 @@ import { useVideoQuery } from "@/lib/hooks";
 import { VideoQuery } from "@/types";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import styled from "@emotion/styled";
 import ReactPlayer from "react-player";
 
 export default function page() {
@@ -59,9 +60,8 @@ export default function page() {
   if (loading) return <div>fetching...</div>;
 
   return (
-    <>
-      <h2>{video.title}</h2>
-      {videoUrl && (
+    <Container>
+      <PlayerWrapper>
         <ReactPlayer
           url={videoUrl}
           controls
@@ -80,7 +80,74 @@ export default function page() {
             },
           }}
         />
-      )}
-    </>
+      </PlayerWrapper>
+      <VideoInfo>
+        <Title>{video.title}</Title>
+        <Details>
+          <span>{video.playCount} 回視聴</span>
+          <span>{new Date(video.updatedAt).toLocaleDateString()}</span>
+        </Details>
+        <Description>{video.description}</Description>
+      </VideoInfo>
+      <CommentsSection>
+        <h3>コメント</h3>
+        {/* コメントリストをここに追加 */}
+      </CommentsSection>
+    </Container>
   );
 }
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+`;
+
+const PlayerWrapper = styled.div`
+  display: flex;
+  justify-content: center; /* 親要素の中央に配置 */
+  position: relative;
+  /* padding-top: 56.25%; 16:9 アスペクト比 */
+  margin-bottom: 16px;
+
+  .react-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const VideoInfo = styled.div`
+  margin-bottom: 24px;
+`;
+
+const Title = styled.h2`
+  margin: 0 0 8px;
+  font-size: 24px;
+`;
+
+const Details = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: gray;
+  margin-bottom: 16px;
+`;
+
+const Description = styled.p`
+  font-size: 16px;
+  line-height: 1.5;
+`;
+
+const CommentsSection = styled.div`
+  margin-top: 32px;
+
+  h3 {
+    margin-bottom: 16px;
+    font-size: 20px;
+  }
+`;

@@ -1,12 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import VideoCard from "@/app/_components/videoCard";
-import { VideoModel } from "@/types";
-
-type VideoCardProps = Pick<
-  VideoModel,
-  "title" | "thumbnailUrl" | "playCount" | "updatedAt" | "id" | "duration"
-> & { Owner: Pick<VideoModel["Owner"], "name" | "id"> };
 
 const videoCardListStyle = css`
   display: flex;
@@ -40,14 +33,8 @@ const videoCardListStyle = css`
   }
 `;
 
-const VideoCardList: React.FC<VideoCardProps[]> = (videos) => {
-  return (
-    <div css={videoCardListStyle}>
-      {videos.map((video) => (
-        <VideoCard key={video.id} {...video} />
-      ))}
-    </div>
-  );
+const VideoCardList: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  return <div css={videoCardListStyle}>{children}</div>;
 };
 
 export default VideoCardList;

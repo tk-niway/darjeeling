@@ -5,7 +5,7 @@ import { VideoModel } from "@/types";
 import { displayDate } from "@/utils/displayDate";
 import { displayDuration } from "@/utils/displayDuration";
 
-type VideoCardProps = Pick<
+export type VideoCardProps = Pick<
   VideoModel,
   "title" | "thumbnailUrl" | "playCount" | "updatedAt" | "id" | "duration"
 > & { Owner: Pick<VideoModel["Owner"], "name" | "id"> };
@@ -38,6 +38,10 @@ const VideoCard: React.FC<VideoCardProps> = (video) => {
     </Card>
   );
 };
+
+export function renderVideoCards(videos: VideoCardProps[]) {
+  return videos.map((video) => <VideoCard key={video.id} {...video} />);
+}
 
 const Card = styled.div`
   display: flex;

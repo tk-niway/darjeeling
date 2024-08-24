@@ -1,11 +1,12 @@
 "use client";
+import { renderVideoCards } from "@/app/_components/videoCard";
 import VideoCardList from "@/app/_components/videoCardList";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { usePublicVideosQuery } from "@/generated/hooks";
 import { VideoVisibility, PublicVideosQuery } from "@/types";
 import React, { useState, useEffect } from "react";
 
-const VideoPlayer = () => {
+const Home = () => {
   const { data, loading, error } = usePublicVideosQuery({
     variables: {
       take: 30,
@@ -43,10 +44,10 @@ const VideoPlayer = () => {
       <h1>Videos</h1>
       <div>
         {videos && videos.length === 0 && <p>No videos found</p>}
-        {videos && VideoCardList(videos)}
+        {videos && <VideoCardList>{renderVideoCards(videos)}</VideoCardList>}
       </div>
     </>
   );
 };
 
-export default VideoPlayer;
+export default Home;

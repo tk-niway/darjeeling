@@ -25,6 +25,10 @@ query UserAndVideos($id: String!) {
       Guests {
         id
       }
+      Owner {
+        id
+        name
+      }
     }
     pageInfo {
       endCursor

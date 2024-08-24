@@ -31,6 +31,10 @@ export const UserAndVideosDocument = gql`
       Guests {
         id
       }
+      Owner {
+        id
+        name
+      }
     }
     pageInfo {
       endCursor

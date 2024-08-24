@@ -1486,7 +1486,7 @@ export type UserAndVideosQueryVariables = Exact<{
 }>;
 
 
-export type UserAndVideosQuery = { __typename?: 'Query', user: { __typename?: 'UserModel', createdAt: any, email: string, id: string, name: string, updatedAt: any, auth0Id: string }, videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', id: string }> }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string } } };
+export type UserAndVideosQuery = { __typename?: 'Query', user: { __typename?: 'UserModel', createdAt: any, email: string, id: string, name: string, updatedAt: any, auth0Id: string }, videos: { __typename?: 'PaginatedVideo', totalCount: number, nodes?: Array<{ __typename?: 'VideoModel', createdAt: any, description?: string | null, duration?: number | null, id: string, isActive: boolean, ownerId: string, playCount: number, thumbnailUrl?: string | null, title: string, updatedAt: any, uploadStatus: VideoUploadStatus, url?: string | null, visibility: VideoVisibility, Guests: Array<{ __typename?: 'UserModel', id: string }>, Owner: { __typename?: 'UserModel', id: string, name: string } }> | null, pageInfo: { __typename?: 'PageInfo', endCursor: string, hasNextPage: boolean, hasPreviousPage: boolean, startCursor: string } } };
 
 export type UploadVideoMutationVariables = Exact<{
   file: Scalars['Upload']['input'];
@@ -1557,6 +1557,10 @@ export const UserAndVideosDocument = gql`
       visibility
       Guests {
         id
+      }
+      Owner {
+        id
+        name
       }
     }
     pageInfo {

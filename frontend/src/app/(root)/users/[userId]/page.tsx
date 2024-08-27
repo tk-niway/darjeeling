@@ -4,102 +4,168 @@ import { redirect } from "next/navigation";
 import { useAuthUser } from "@/app/_providers/authUserProvider";
 import { useParams } from "next/navigation";
 import { useUserAndVideosQuery } from "@/lib/hooks";
-import { UserAndVideosQuery, VideoModel } from "@/types";
-import Link from "next/link";
-import VideoCard from "@/app/_components/videoCard";
+import {
+  UserAndVideosQuery,
+  VideoUploadStatus,
+  VideoVisibility,
+} from "@/types";
+import { Tabs, Tab, Box, Typography, Button } from "@mui/material";
+import styled from "@emotion/styled";
+import VideoCardList from "@/app/_components/videoCardList";
+import { renderVideoCards } from "@/app/_components/videoCard";
+import {
+  EditVideoCardProps,
+  renderEditVideoCards,
+} from "@/app/_components/editVideoCard";
 
-// TODO optimize the layout for videos & user
 // Todo add modal to upload video
 // todo list sorting change asc
-export default function page() {
-  const { authUser } = useAuthUser();
+export default function Page() {
+  const { authUser, isLoading } = useAuthUser();
   const { userId } = useParams<{ userId: string }>();
+
   const { data, loading, error } = useUserAndVideosQuery({
     variables: {
       id: userId,
     },
   });
+
   const [isMe, setIsMe] = useState<boolean>(false);
+
   const [displayUser, setDisplayUser] = useState<UserAndVideosQuery["user"]>(
     {} as UserAndVideosQuery["user"]
   );
-  const [displayVideos, setDisplayVideos] = useState<
-    UserAndVideosQuery["videos"]["nodes"]
-  >([]);
+
+  const [displayVideos, setDisplayVideos] = useState<EditVideoCardProps[]>([]);
+
   const [videoPageInfo, setVideoPageInfo] = useState<
     UserAndVideosQuery["videos"]["pageInfo"]
   >({} as UserAndVideosQuery["videos"]["pageInfo"]);
+
   const [totalVideoCount, setTotalVideoCount] = useState<number>(0);
+
+  const [tabIndex, setTabIndex] = useState<number>(0);
 
   if (!userId) redirect("/"); // redirect to home page if userId is not provided
 
   useEffect(() => {
-    if (authUser.id === userId) setIsMe(true);
-  }, [authUser.id]);
+    if (isLoading) return;
 
-  useEffect(() => {
-    if (!loading && data) {
+    const _isMe = authUser.id === userId;
+
+    setIsMe(_isMe);
+
+    if (data) {
       setDisplayUser(data.user);
-      setDisplayVideos(data.videos.nodes);
       setVideoPageInfo(data.videos.pageInfo);
       setTotalVideoCount(data.videos.totalCount);
+
+      if (data.videos.nodes) {
+        setDisplayVideos(data.videos.nodes);
+
+        if (!_isMe) {
+          const filteredVideos = data.videos.nodes.filter((video) => {
+            if (
+              video.isActive === true &&
+              video.visibility === VideoVisibility.Public &&
+              video.uploadStatus === VideoUploadStatus.Completed
+            ) {
+              return video;
+            }
+          });
+          setDisplayVideos(filteredVideos);
+        }
+      }
     }
-  }, [loading]);
+  }, [isLoading, data]);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
+  };
 
   return (
-    <>
-      <h1>{displayUser.name} Videos</h1>
-      {userSection(displayUser)}
-      {videoSection(displayVideos, totalVideoCount)}
-    </>
-  );
-}
-
-function videosCard(video: any) {
-  return (
-    <div key={video.id}>
-      <Link href={`${video.ownerId}/videos/edit/${video.id}`}>
-        <p>{video?.title}</p>
-      </Link>
-      <p>{video?.description}</p>
-      <p>{video?.playCount}</p>
-      <p>{video?.url}</p>
-      <p>{video?.duration}</p>
-      <p>{video?.thumbnailUrl}</p>
-      {video.thumbnailUrl ? (
+    <Container>
+      {/* <ProfileBanner>
         <img
-          src={video?.thumbnailUrl}
-          alt={video?.title}
-          width={200}
-          height={100}
+          src=""
+          alt="Profile Banner"
         />
-      ) : (
-        ""
-      )}
-    </div>
+      </ProfileBanner> */}
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography variant="h6">{displayUser.name}の動画</Typography>
+        {isMe && (
+          <Button variant="contained" color="primary">
+            アップロード
+          </Button>
+        )}
+      </Box>
+      <TabsContainer>
+        <Tabs value={tabIndex} onChange={handleTabChange} centered>
+          <Tab label="動画" />
+          {/* <Tab label="再生リスト" /> */}
+          {/* <Tab label="概要" />  */}
+        </Tabs>
+      </TabsContainer>
+      <TabPanel value={tabIndex} index={0}>
+        <VideoCardList>
+          {isMe
+            ? renderEditVideoCards(displayVideos)
+            : renderVideoCards(displayVideos)}
+        </VideoCardList>
+      </TabPanel>
+      {/* <TabPanel value={tabIndex} index={1}>
+        <Typography>再生リストの内容</Typography>
+      </TabPanel> */}
+      {/* <TabPanel value={tabIndex} index={2}>
+        <Typography>概要の内容</Typography>
+      </TabPanel> */}
+    </Container>
   );
 }
 
-function videoSection(
-  videos: UserAndVideosQuery["videos"]["nodes"],
-  totalVideoCount: number
-) {
-  if (!videos || videos.length === 0) return <p>No videos found</p>;
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+`;
 
-  return (
-    <div>
-      <h2>Videos {totalVideoCount}</h2>
-      {videos.map((video) => videosCard(video))}
-    </div>
-  );
+const ProfileBanner = styled.div`
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+  img {
+    width: 100%;
+    height: auto;
+  }
+  margin-bottom: 8px;
+`;
+
+const TabsContainer = styled.div`
+  margin-top: 16px;
+  background-color: white;
+  color: black;
+`;
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-function userSection(user: UserAndVideosQuery["user"]) {
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
   return (
-    <div>
-      <h2>User</h2>
-      <p>{user.name}</p>
-      <p>{user.email}</p>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`tabpanel-${index}`}
+      aria-labelledby={`tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box p={3}>{children}</Box>}
     </div>
   );
 }

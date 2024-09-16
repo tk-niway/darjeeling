@@ -113,8 +113,8 @@
   },
   "engines": {
     "npm": "use yarn instead",
-    "node": "18.17.x",
-    "yarn": "4.0.1"
+    "node": "20.17.x",
+    "yarn": "4.5.0"
   },
-  "packageManager": "yarn@4.0.1"
+  "packageManager": "yarn@4.5.0"
 }
